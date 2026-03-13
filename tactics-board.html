@@ -351,6 +351,7 @@ let homePlayers = [];
 let awayPlayers = [];
 let arrows = [];
 let zones = [];
+let ball = {_norm:[.5,.5], x:0, y:0};
 let activeTool = 'arrow'; // 'arrow' | 'zone'
 
 // Drag state
@@ -398,6 +399,7 @@ function normToCanvas(xy) { return {x:xy[0]*canvas.width, y:xy[1]*canvas.height}
 function positionPlayersFromNorm() {
   homePlayers.forEach(p=>{ const c=normToCanvas(p._norm); p.x=c.x; p.y=c.y; });
   awayPlayers.forEach(p=>{ const c=normToCanvas(p._norm); p.x=c.x; p.y=c.y; });
+  const cb=normToCanvas(ball._norm); ball.x=cb.x; ball.y=cb.y;
 }
 
 function buildPlayers(key, mirror) {
@@ -426,7 +428,7 @@ function buildFormSelects() {
 function applyFormation(team, key) {
   if (team==='home') homePlayers = buildPlayers(key, false);
   else awayPlayers = buildPlayers(key, true);
-  arrows=[]; zones=[]; render();
+  arrows=[]; zones=[]; ball={_norm:[.5,.5],x:0,y:0}; render();
 }
 
 function initBoard() {
@@ -555,6 +557,39 @@ function drawPlayer(p, isHome) {
   ctx.restore();
 }
 
+function drawBall(b) {
+  const r = Math.max(7, Math.min(10, canvas.width * .022));
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=8; ctx.shadowOffsetY=3;
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2); ctx.fill();
+  ctx.shadowColor='transparent';
+  ctx.strokeStyle='#222'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2); ctx.stroke();
+  // football patch pattern: center + 5 surrounding
+  const pts=[[0,0],...Array.from({length:5},(_,i)=>{
+    const a=i/5*Math.PI*2-Math.PI/2;
+    return [Math.cos(a)*r*.52, Math.sin(a)*r*.52];
+  })];
+  ctx.fillStyle='#1a1a1a'; ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=.6;
+  pts.forEach(([dx,dy])=>{
+    const pr=r*.28;
+    ctx.beginPath();
+    for(let i=0;i<5;i++){
+      const a=i/5*Math.PI*2-Math.PI/2;
+      const mx=b.x+dx+Math.cos(a)*pr, my=b.y+dy+Math.sin(a)*pr;
+      i===0?ctx.moveTo(mx,my):ctx.lineTo(mx,my);
+    }
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  });
+  ctx.restore();
+}
+
+function ballAt(x,y) {
+  const r=Math.max(7,Math.min(10,canvas.width*.022))+4;
+  return (x-ball.x)**2+(y-ball.y)**2 < r*r;
+}
+
 function drawArrow(x1,y1,x2,y2,dashed=false) {
   const dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy);
   if (len<8) return;
@@ -602,6 +637,9 @@ function render() {
     if (w>4||h>4) drawZone(x,y,w,h,true);
   }
 
+  // Ball (behind players)
+  drawBall(ball);
+
   // Players
   awayPlayers.forEach(p=>drawPlayer(p,false));
   homePlayers.forEach(p=>drawPlayer(p,true));
@@ -631,6 +669,8 @@ canvas.addEventListener('mousedown', e=>{
   if (hit) {
     const p=getPlayer(hit.team,hit.idx);
     dragState={type:'move',startX:x,startY:y,moved:false,team:hit.team,idx:hit.idx,ox:p.x-x,oy:p.y-y};
+  } else if (ballAt(x,y)) {
+    dragState={type:'ball',startX:x,startY:y,moved:false,ox:ball.x-x,oy:ball.y-y};
   } else {
     const type=activeTool; // 'arrow' or 'zone'
     dragState={type,startX:x,startY:y,moved:false};
@@ -649,6 +689,9 @@ canvas.addEventListener('mousemove', e=>{
       const p=getPlayer(dragState.team,dragState.idx);
       p.x=x+dragState.ox; p.y=y+dragState.oy;
       p._norm=[p.x/canvas.width, p.y/canvas.height];
+    } else if (dragState.type==='ball') {
+      ball.x=x+dragState.ox; ball.y=y+dragState.oy;
+      ball._norm=[ball.x/canvas.width, ball.y/canvas.height];
     }
   }
   render();
@@ -656,9 +699,12 @@ canvas.addEventListener('mousemove', e=>{
   // Tooltip
   const tip=document.getElementById('tip');
   const hit=playerAt(x,y);
-  if (hit&&!dragState) {
+  if (!dragState && hit) {
     const p=getPlayer(hit.team,hit.idx);
     tip.textContent=`${hit.team==='home'?'Home':'Away'} #${p.n}${p.pos?' · '+p.pos:''} — 클릭: 번호 수정`;
+    tip.style.opacity='1'; tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-28)+'px';
+  } else if (!dragState && ballAt(x,y)) {
+    tip.textContent='공 — 드래그로 이동';
     tip.style.opacity='1'; tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-28)+'px';
   } else {
     tip.style.opacity='0';
@@ -671,9 +717,10 @@ canvas.addEventListener('mouseup', e=>{
 
   if (dragState.type==='move') {
     if (!dragState.moved) {
-      // Tap on player → open number editor
       openPlayerEdit(dragState.team, dragState.idx, e.clientX, e.clientY);
     }
+  } else if (dragState.type==='ball') {
+    // just drop — nothing extra needed
   } else if (dragState.type==='arrow') {
     const dx=x-dragState.startX, dy=y-dragState.startY;
     if (Math.sqrt(dx*dx+dy*dy)>12)
