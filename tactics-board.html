@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Tactics Board</title>
+<title>축구 전술판 | Football Tactics Board</title>
+<meta name="description" content="무료 온라인 축구 전술판. 포메이션 설정, 선수 배치, 화살표·존 그리기 기능 제공. 축구·풋살·7인제 지원.">
+<meta name="keywords" content="축구 전술판, 풋살 전술판, football tactics board, soccer tactics, 포메이션, 전술 보드, tactics board, free tactics board">
+<meta name="author" content="bloglish">
+<meta property="og:title" content="축구 전술판 | Football Tactics Board">
+<meta property="og:description" content="무료 온라인 축구 전술판. 포메이션 설정, 선수 배치, 화살표·존 그리기.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bloglish.github.io/tactics-board/">
+<link rel="canonical" href="https://bloglish.github.io/tactics-board/">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 :root {
@@ -104,6 +112,40 @@ footer {
 .edit-cancel { flex:1; padding:6px; background:none; border:1px solid var(--border); border-radius:5px; cursor:pointer; font-size:12px; color:var(--muted); }
 .edit-cancel:hover { background:var(--bg); }
 
+/* ── ABOUT MODAL ── */
+#about-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.4);
+  z-index:400; align-items:center; justify-content:center;
+}
+#about-overlay.show { display:flex; }
+#about-box {
+  background:var(--panel); border-radius:12px; padding:24px 28px;
+  max-width:320px; width:90%; box-shadow:0 8px 32px rgba(0,0,0,.2);
+  position:relative;
+}
+#about-box h2 { font-size:15px; font-weight:700; margin-bottom:6px; }
+#about-box p { font-size:12px; color:var(--muted); line-height:1.6; margin-bottom:14px; }
+.about-links { display:flex; flex-direction:column; gap:8px; }
+.about-link {
+  display:flex; align-items:center; gap:8px; padding:9px 12px;
+  border:1px solid var(--border); border-radius:7px; text-decoration:none;
+  color:var(--text); font-size:12px; font-weight:500; transition:background .15s;
+}
+.about-link:hover { background:var(--bg); }
+.about-link-icon { font-size:15px; }
+.about-close {
+  position:absolute; top:12px; right:14px; background:none; border:none;
+  cursor:pointer; font-size:18px; color:var(--muted); line-height:1;
+}
+.about-close:hover { color:var(--text); }
+.about-btn {
+  margin-left:auto; width:28px; height:28px; border:1px solid var(--border);
+  background:none; border-radius:50%; cursor:pointer; font-size:13px;
+  color:var(--muted); display:flex; align-items:center; justify-content:center;
+  transition:all .15s; flex-shrink:0;
+}
+.about-btn:hover { background:var(--bg); color:var(--text); }
+
 /* ── TOOLTIP ── */
 #tip { position:fixed; background:#111; color:#fff; font-size:11px; padding:4px 9px; border-radius:4px; pointer-events:none; opacity:0; transition:opacity .12s; z-index:99; white-space:nowrap; }
 
@@ -131,6 +173,25 @@ footer {
 <body>
 
 <div id="tip"></div>
+
+<!-- About modal -->
+<div id="about-overlay" onclick="closeAbout(event)">
+  <div id="about-box">
+    <button class="about-close" onclick="closeAbout()">×</button>
+    <h2>⚽ 축구 전술판</h2>
+    <p>포메이션 설정, 선수 배치, 화살표·존 그리기를 지원하는 무료 온라인 전술 보드입니다. 축구·풋살·7인제 지원.</p>
+    <div class="about-links">
+      <a class="about-link" href="https://github.com/bloglish/tactics-board/issues/new" target="_blank" rel="noopener">
+        <span class="about-link-icon">💬</span>
+        피드백 · 버그 제보
+      </a>
+      <a class="about-link" href="https://github.com/bloglish/tactics-board" target="_blank" rel="noopener">
+        <span class="about-link-icon">⭐</span>
+        GitHub — bloglish/tactics-board
+      </a>
+    </div>
+  </div>
+</div>
 
 <!-- Player number editor -->
 <div id="player-edit">
@@ -194,6 +255,7 @@ footer {
   </div>
   <div class="sep"></div>
   <button class="clear-btn" onclick="clearAll()" title="화살표와 존을 모두 지웁니다">지우기</button>
+  <button class="about-btn" onclick="openAbout()" title="정보 · 피드백">?</button>
 </footer>
 
 <script>
@@ -859,6 +921,12 @@ function changeCount(delta) {
 }
 
 function clearAll() { arrows=[]; zones=[]; dragState=null; render(); }
+
+function openAbout() { document.getElementById('about-overlay').classList.add('show'); }
+function closeAbout(e) {
+  if (e && e.target !== document.getElementById('about-overlay')) return;
+  document.getElementById('about-overlay').classList.remove('show');
+}
 
 function changeZoom(delta) {
   zoom=Math.max(0.4,Math.min(4.0,zoom+delta));
