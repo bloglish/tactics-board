@@ -571,49 +571,16 @@ function drawPlayer(p, isHome) {
 function drawBall(b) {
   const r = Math.max(11, Math.min(15, canvas.width * .030));
   ctx.save();
-
-  // Shadow + dark base
-  ctx.shadowColor='rgba(0,0,0,.55)'; ctx.shadowBlur=8; ctx.shadowOffsetY=3;
-  ctx.fillStyle='#3a3a3a';
-  ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2); ctx.fill();
-  ctx.shadowColor='transparent';
-
-  // Clip white pentagons to ball circle
-  ctx.save();
-  ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2); ctx.clip();
-
-  // Draw a white pentagon centered at (cx,cy) with inradius pr, rotated rot
-  const penta=(cx,cy,pr,rot)=>{
-    ctx.beginPath();
-    for(let i=0;i<5;i++){
-      const a = rot - Math.PI/2 + i*Math.PI*2/5;
-      i===0?ctx.moveTo(cx+Math.cos(a)*pr,cy+Math.sin(a)*pr)
-           :ctx.lineTo(cx+Math.cos(a)*pr,cy+Math.sin(a)*pr);
-    }
-    ctx.closePath();
-    ctx.fillStyle='#f0f0f0'; ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=0.8; ctx.stroke();
-  };
-
-  // 5 white patches — mirroring the classic Telstar pattern face
-  //   top, mid-left, mid-right, bottom-left, bottom-right
-  const pr = r * .36;
-  penta(b.x,          b.y - r*.42,  pr,  0           );  // top
-  penta(b.x - r*.44,  b.y - r*.08,  pr, -Math.PI*2/5 );  // mid-left
-  penta(b.x + r*.44,  b.y - r*.08,  pr,  Math.PI*2/5 );  // mid-right
-  penta(b.x - r*.27,  b.y + r*.40,  pr, -Math.PI/5   );  // bottom-left
-  penta(b.x + r*.27,  b.y + r*.40,  pr,  Math.PI/5   );  // bottom-right
-
-  ctx.restore();
-
-  // Ball outline
-  ctx.strokeStyle='rgba(0,0,0,.55)'; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2); ctx.stroke();
+  ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=6; ctx.shadowOffsetY=2;
+  ctx.font = `${Math.round(r * 2)}px serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('⚽', b.x, b.y);
   ctx.restore();
 }
 
 function ballAt(x,y) {
-  const r=Math.max(7,Math.min(10,canvas.width*.022))+4;
+  const r=Math.max(11,Math.min(15,canvas.width*.030));
   return (x-ball.x)**2+(y-ball.y)**2 < r*r;
 }
 
