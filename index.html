@@ -257,6 +257,8 @@ footer {
   </span>
   <div class="sep"></div>
   <div class="zoom-group">
+    <button class="zoom-btn" id="orient-btn" onclick="toggleOrientation()" title="가로형으로 전환" style="font-size:13px;">↔</button>
+    <div style="width:1px;height:16px;background:var(--border);margin:0 2px;"></div>
     <button class="zoom-btn" onclick="changeZoom(-.2)" title="축소">−</button>
     <span id="zoom-val">100%</span>
     <button class="zoom-btn" onclick="changeZoom(.2)" title="확대">+</button>
@@ -434,6 +436,7 @@ let ball = {_norm:[.5,.5], x:0, y:0};
 let homeColor = '#ffffff';
 let awayColor = '#1a1a1a';
 let activeTool = 'arrow'; // 'arrow' | 'zone'
+let orientation = 'portrait'; // 'portrait' | 'landscape'
 
 // Drag state
 let dragState = null;
@@ -455,7 +458,10 @@ const canvas = document.getElementById('pitch');
 const ctx = canvas.getContext('2d');
 const container = document.getElementById('pitch-container');
 
-function pitchRatio() { return mode==='futsal' ? 20/40 : 68/105; }
+function pitchRatio() {
+  if (mode === 'futsal') return orientation === 'landscape' ? 40/20 : 20/40;
+  return orientation === 'landscape' ? 105/68 : 68/105;
+}
 
 function resize() {
   const headerH = document.querySelector('header').offsetHeight;
@@ -486,7 +492,11 @@ function positionPlayersFromNorm() {
 function buildPlayers(key, mirror) {
   const specs = coordsForFormation(key);
   return specs.map(s=>{
-    const norm = mirror ? [s.xy[0], 1-s.xy[1]] : [...s.xy];
+    let norm = mirror ? [s.xy[0], 1-s.xy[1]] : [...s.xy];
+    // Formation data is always in portrait space; transform if landscape
+    if (orientation === 'landscape') {
+      norm = [norm[1], 1 - norm[0]];
+    }
     const c = normToCanvas(norm);
     return {n:s.n, pos:s.pos, _norm:norm, x:c.x, y:c.y};
   });
@@ -517,7 +527,28 @@ function initBoard() {
   const firstKey = ()=>listFormations(playerCount)[0]?.key||'gk';
   homePlayers = buildPlayers(document.getElementById('home-form').value||firstKey(), false);
   awayPlayers = buildPlayers(document.getElementById('away-form').value||firstKey(), true);
-  arrows=[]; zones=[]; render();
+  arrows=[]; zones=[]; paths=[]; render();
+}
+
+function toggleOrientation() {
+  // Transform all player positions
+  const toL = n => [n[1], 1 - n[0]];
+  const toP = n => [1 - n[1], n[0]];
+  const fn = orientation === 'portrait' ? toL : toP;
+  homePlayers.forEach(p => { p._norm = fn(p._norm); });
+  awayPlayers.forEach(p => { p._norm = fn(p._norm); });
+  ball._norm = fn(ball._norm);
+  arrows = []; zones = []; paths = [];
+  orientation = orientation === 'portrait' ? 'landscape' : 'portrait';
+  updateOrientBtn();
+  resize();
+}
+
+function updateOrientBtn() {
+  const btn = document.getElementById('orient-btn');
+  if (!btn) return;
+  btn.textContent = orientation === 'landscape' ? '↕' : '↔';
+  btn.title = orientation === 'landscape' ? '세로형으로 전환' : '가로형으로 전환';
 }
 
 function getPlayer(team,idx) { return team==='home'?homePlayers[idx]:awayPlayers[idx]; }
@@ -606,6 +637,69 @@ function drawFutsalPitch() {
   ctx.fillStyle=lc;
   ctx.beginPath(); ctx.arc(W/2, py+H*.12, 2.5, 0, Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(W/2, H-py-H*.12, 2.5, 0, Math.PI*2); ctx.fill();
+}
+
+function drawSoccerPitchLandscape() {
+  const W=canvas.width, H=canvas.height;
+  const lc='rgba(255,255,255,.32)';
+  ctx.fillStyle='#2A4D35'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle=lc; ctx.lineWidth=1.5;
+  const px=W*.04, py=H*.06;
+  // Field outline
+  ctx.strokeRect(px, py, W-px*2, H-py*2);
+  // Center line (vertical)
+  ctx.beginPath(); ctx.moveTo(W/2, py); ctx.lineTo(W/2, H-py); ctx.stroke();
+  // Center circle + dot
+  ctx.beginPath(); ctx.arc(W/2, H/2, H*.12, 0, Math.PI*2); ctx.stroke();
+  ctx.fillStyle=lc; ctx.beginPath(); ctx.arc(W/2, H/2, 2.5, 0, Math.PI*2); ctx.fill();
+  // Penalty areas (left and right)
+  const paD=W*.155, paW=H*.50;
+  ctx.strokeStyle=lc;
+  ctx.strokeRect(px, (H-paW)/2, paD, paW);
+  ctx.strokeRect(W-px-paD, (H-paW)/2, paD, paW);
+  // Goal areas
+  const gaD=W*.055, gaW=H*.26;
+  ctx.strokeRect(px, (H-gaW)/2, gaD, gaW);
+  ctx.strokeRect(W-px-gaD, (H-gaW)/2, gaD, gaW);
+  // Goals
+  const goD=W*.022, goW=H*.13;
+  ctx.strokeStyle='rgba(255,255,255,.5)';
+  ctx.strokeRect(px-goD, (H-goW)/2, goD, goW);
+  ctx.strokeRect(W-px, (H-goW)/2, goD, goW);
+  // Penalty spots
+  ctx.fillStyle=lc;
+  ctx.beginPath(); ctx.arc(px+W*.11, H/2, 2.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W-px-W*.11, H/2, 2.5, 0, Math.PI*2); ctx.fill();
+  // Penalty arcs
+  ctx.strokeStyle=lc;
+  ctx.beginPath(); ctx.arc(px+W*.11, H/2, H*.12, -.32*Math.PI, .32*Math.PI); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W-px-W*.11, H/2, H*.12, .68*Math.PI, 1.32*Math.PI); ctx.stroke();
+}
+
+function drawFutsalPitchLandscape() {
+  const W=canvas.width, H=canvas.height;
+  const lc='rgba(255,255,255,.32)';
+  ctx.fillStyle='#1F4030'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle=lc; ctx.lineWidth=1.5;
+  const px=W*.04, py=H*.07;
+  ctx.strokeRect(px, py, W-px*2, H-py*2);
+  // Center line (vertical)
+  ctx.beginPath(); ctx.moveTo(W/2, py); ctx.lineTo(W/2, H-py); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2, H/2, H*.15, 0, Math.PI*2); ctx.stroke();
+  ctx.fillStyle=lc; ctx.beginPath(); ctx.arc(W/2, H/2, 3, 0, Math.PI*2); ctx.fill();
+  // D-arcs (left and right)
+  const r=H*.30;
+  ctx.beginPath(); ctx.arc(px, H/2, r, -Math.PI/2, Math.PI/2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W-px, H/2, r, Math.PI/2, Math.PI*1.5); ctx.stroke();
+  // Goals
+  const goD=W*.03, goW=H*.22;
+  ctx.strokeStyle='rgba(255,255,255,.5)';
+  ctx.strokeRect(px-goD, (H-goW)/2, goD, goW);
+  ctx.strokeRect(W-px, (H-goW)/2, goD, goW);
+  // Spots
+  ctx.fillStyle=lc;
+  ctx.beginPath(); ctx.arc(px+W*.12, H/2, 2.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W-px-W*.12, H/2, 2.5, 0, Math.PI*2); ctx.fill();
 }
 
 // ── PLAYER / ARROW / ZONE DRAWING ────────────────────────────────────
@@ -711,7 +805,11 @@ function drawZone(x,y,w,h,preview=false) {
 
 function render() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  if (mode==='futsal') drawFutsalPitch(); else drawSoccerPitch();
+  if (mode==='futsal') {
+    orientation==='landscape' ? drawFutsalPitchLandscape() : drawFutsalPitch();
+  } else {
+    orientation==='landscape' ? drawSoccerPitchLandscape() : drawSoccerPitch();
+  }
 
   // Committed zones
   zones.forEach(z=>drawZone(z.x,z.y,z.w,z.h));
@@ -952,7 +1050,8 @@ function setMode(m) {
   const opts=listFormations(playerCount);
   document.getElementById('home-form').value=opts[0]?.key||'gk';
   document.getElementById('away-form').value=(opts[1]??opts[0])?.key||'gk';
-  arrows=[]; zones=[];
+  arrows=[]; zones=[]; paths=[];
+  initBoard();
   resize();
 }
 
@@ -990,13 +1089,14 @@ canvas.addEventListener('wheel', e=>{
 
 // ── BOOT ─────────────────────────────────────────────────────────────
 window.addEventListener('resize', resize);
-
+orientation = window.innerWidth > 640 ? 'landscape' : 'portrait';
 buildFormSelects();
 const initOpts=listFormations(playerCount);
 document.getElementById('home-form').value=initOpts[0]?.key||'gk';
 document.getElementById('away-form').value=(initOpts[1]??initOpts[0])?.key||'gk';
 homePlayers=buildPlayers(document.getElementById('home-form').value,false);
 awayPlayers=buildPlayers(document.getElementById('away-form').value,true);
+updateOrientBtn();
 resize();
 </script>
 </body>
