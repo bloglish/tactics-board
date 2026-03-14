@@ -195,17 +195,6 @@ footer {
 }
 .about-btn:hover { background:var(--bg); color:var(--text); }
 
-/* ── SEO SECTION ── */
-#seo-desc {
-  background:var(--panel); border-top:1px solid var(--border);
-  padding:12px 20px; flex-shrink:0;
-}
-#seo-desc h1 { font-size:11px; font-weight:600; color:var(--muted); margin-bottom:4px; }
-#seo-desc p, #seo-desc li { font-size:10px; color:var(--muted); line-height:1.5; }
-#seo-desc ul { display:flex; flex-wrap:wrap; gap:2px 16px; list-style:none; margin-top:4px; }
-#seo-desc li::before { content:'· '; }
-@media (max-width:640px) { #seo-desc { display:none; } }
-
 /* ── TOOLTIP ── */
 #tip { position:fixed; background:#111; color:#fff; font-size:11px; padding:4px 9px; border-radius:4px; pointer-events:none; opacity:0; transition:opacity .12s; z-index:99; white-space:nowrap; }
 
@@ -328,21 +317,6 @@ footer {
   <button class="clear-btn" onclick="clearAll()" title="화살표와 존을 모두 지웁니다">지우기</button>
   <button class="about-btn" onclick="openAbout()" title="정보 · 피드백">?</button>
 </footer>
-
-<!-- SEO content: visible to crawlers, minimal visual footprint -->
-<section id="seo-desc" aria-label="서비스 소개">
-  <h1>무료 온라인 축구 전술판</h1>
-  <p>설치 없이 바로 쓰는 <strong>무료 축구 전술판</strong>입니다. 4-3-3, 4-4-2, 4-2-3-1 등 다양한 <strong>포메이션 설정</strong>과 선수 배치, 화살표·존·펜 드로잉을 지원합니다. <strong>풋살 전술판</strong> 및 7인제 전술판으로도 활용 가능하며, 모바일·PC 모두 지원합니다.</p>
-  <ul>
-    <li>축구(11인제) · 풋살(5인제) · 7인제 지원</li>
-    <li>4-3-3, 4-4-2, 4-2-3-1, 3-5-2, 5-3-2 등 포메이션 제공</li>
-    <li>선수 드래그로 자유로운 배치</li>
-    <li>화살표·존·펜 드로잉으로 전술 표현</li>
-    <li>홈/어웨이 유니폼 색상 설정</li>
-    <li>가로형·세로형 피치 방향 전환</li>
-    <li>모바일 터치 및 핀치 줌 지원</li>
-  </ul>
-</section>
 
 <script>
 // ── FORMATION DATA ────────────────────────────────────────────────────
