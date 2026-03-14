@@ -560,28 +560,33 @@ function drawPlayer(p, isHome) {
 function drawBall(b) {
   const r = Math.max(7, Math.min(10, canvas.width * .022));
   ctx.save();
-  ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=8; ctx.shadowOffsetY=3;
-  ctx.fillStyle='#fff';
+  // Shadow
+  ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=7; ctx.shadowOffsetY=3;
+  ctx.fillStyle='#f5f5f5';
   ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2); ctx.fill();
   ctx.shadowColor='transparent';
-  ctx.strokeStyle='#222'; ctx.lineWidth=1;
+  // Seam lines (football curved lines)
+  ctx.save();
+  ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2); ctx.clip();
+  ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1;
+  // Vertical seam
+  ctx.beginPath();
+  ctx.moveTo(b.x, b.y-r);
+  ctx.bezierCurveTo(b.x+r*.6, b.y-r*.3, b.x+r*.6, b.y+r*.3, b.x, b.y+r);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(b.x, b.y-r);
+  ctx.bezierCurveTo(b.x-r*.6, b.y-r*.3, b.x-r*.6, b.y+r*.3, b.x, b.y+r);
+  ctx.stroke();
+  // Horizontal seam
+  ctx.beginPath();
+  ctx.moveTo(b.x-r, b.y);
+  ctx.bezierCurveTo(b.x-r*.3, b.y-r*.6, b.x+r*.3, b.y-r*.6, b.x+r, b.y);
+  ctx.stroke();
+  ctx.restore();
+  // Outline
+  ctx.strokeStyle='rgba(0,0,0,.55)'; ctx.lineWidth=1;
   ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2); ctx.stroke();
-  // football patch pattern: center + 5 surrounding
-  const pts=[[0,0],...Array.from({length:5},(_,i)=>{
-    const a=i/5*Math.PI*2-Math.PI/2;
-    return [Math.cos(a)*r*.52, Math.sin(a)*r*.52];
-  })];
-  ctx.fillStyle='#1a1a1a'; ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=.6;
-  pts.forEach(([dx,dy])=>{
-    const pr=r*.28;
-    ctx.beginPath();
-    for(let i=0;i<5;i++){
-      const a=i/5*Math.PI*2-Math.PI/2;
-      const mx=b.x+dx+Math.cos(a)*pr, my=b.y+dy+Math.sin(a)*pr;
-      i===0?ctx.moveTo(mx,my):ctx.lineTo(mx,my);
-    }
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-  });
   ctx.restore();
 }
 
