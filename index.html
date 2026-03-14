@@ -2,79 +2,125 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Tactics Board</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 :root {
-  --bg:#F7F7F5; --panel:#fff; --border:#E8E8E4;
+  --bg:#F0F0EE; --panel:#fff; --border:#E0E0DC;
   --text:#111; --muted:#999; --accent:#E8C84A;
 }
+html, body { height:100%; }
 body {
   background:var(--bg); font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
-  height:100vh; display:flex; flex-direction:column; overflow:hidden; color:var(--text);
+  height:100dvh; display:flex; flex-direction:column; overflow:hidden; color:var(--text);
 }
 
 /* ── HEADER ── */
 header {
-  height:50px; display:flex; align-items:center; gap:16px;
-  padding:0 20px; border-bottom:1px solid var(--border); background:var(--panel);
-  flex-shrink:0; flex-wrap:nowrap;
+  border-bottom:1px solid var(--border); background:var(--panel);
+  display:flex; align-items:center; gap:10px; padding:8px 16px;
+  flex-shrink:0; flex-wrap:wrap;
 }
 .mode-tabs { display:flex; gap:2px; background:var(--bg); padding:3px; border-radius:8px; border:1px solid var(--border); flex-shrink:0; }
-.mode-btn { padding:4px 12px; font-size:11px; font-weight:500; border:none; background:none; border-radius:5px; cursor:pointer; color:var(--muted); transition:all .15s; }
+.mode-btn { padding:5px 12px; font-size:11px; font-weight:500; border:none; background:none; border-radius:5px; cursor:pointer; color:var(--muted); transition:all .15s; white-space:nowrap; }
 .mode-btn.active { background:var(--panel); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.1); }
 
-.form-wrap { display:flex; align-items:center; gap:8px; flex:1; min-width:0; justify-content:center; }
+.form-wrap { display:flex; align-items:center; gap:8px; flex:1; min-width:180px; justify-content:center; flex-wrap:wrap; }
 .form-select {
   appearance:none; -webkit-appearance:none; border:1px solid var(--border); background:var(--bg);
-  padding:5px 28px 5px 10px; border-radius:6px; font-size:11px; font-weight:500; color:var(--text);
-  cursor:pointer; outline:none; transition:border-color .15s;
+  padding:5px 26px 5px 10px; border-radius:6px; font-size:11px; font-weight:500; color:var(--text);
+  cursor:pointer; outline:none; transition:border-color .15s; min-width:88px; max-width:140px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
-  background-repeat:no-repeat; background-position:right 8px center; min-width:90px; max-width:140px;
+  background-repeat:no-repeat; background-position:right 8px center;
 }
 .form-select:hover { border-color:#bbb; }
-.vs-badge { font-size:11px; color:var(--muted); letter-spacing:.1em; flex-shrink:0; }
+.vs-badge { font-size:10px; color:var(--muted); letter-spacing:.05em; flex-shrink:0; }
 
-.count-ctrl { display:flex; align-items:center; gap:4px; flex-shrink:0; }
-.ctrl-label { font-size:10px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; margin-right:4px; }
-.cnt-btn {
-  width:24px; height:24px; border:1px solid var(--border); background:none; border-radius:5px;
-  cursor:pointer; font-size:14px; color:var(--text); display:flex; align-items:center; justify-content:center;
-  transition:all .15s; line-height:1;
-}
-.cnt-btn:hover { background:var(--bg); border-color:#bbb; }
-#count-val { font-size:13px; font-weight:600; min-width:22px; text-align:center; }
+.count-ctrl { display:flex; align-items:center; gap:5px; flex-shrink:0; }
+.ctrl-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.cnt-btn { width:26px; height:26px; border:1px solid var(--border); background:none; border-radius:5px; cursor:pointer; font-size:14px; color:var(--text); display:flex; align-items:center; justify-content:center; transition:all .15s; }
+.cnt-btn:hover { background:var(--bg); }
+#count-val { font-size:13px; font-weight:600; min-width:20px; text-align:center; }
 
 /* ── MAIN ── */
-main { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; overflow:auto; }
+main { flex:1; display:flex; align-items:center; justify-content:center; padding:16px; overflow:hidden; min-height:0; }
 #pitch-container { position:relative; }
-canvas#pitch { display:block; border-radius:6px; cursor:crosshair; }
+canvas#pitch { display:block; border-radius:8px; touch-action:none; cursor:crosshair; }
 
 /* ── FOOTER ── */
 footer {
-  height:44px; border-top:1px solid var(--border); background:var(--panel);
-  display:flex; align-items:center; padding:0 20px; gap:8px; flex-shrink:0;
+  border-top:1px solid var(--border); background:var(--panel);
+  display:flex; align-items:center; padding:8px 16px; gap:8px; flex-shrink:0;
+  flex-wrap:wrap; min-height:52px;
 }
-.tool-btns { display:flex; gap:4px; }
+.tool-group { display:flex; gap:4px; }
 .tool-btn {
-  padding:4px 12px; font-size:11px; border:1px solid var(--border); background:none;
-  border-radius:5px; cursor:pointer; color:var(--text); transition:all .15s;
+  display:flex; align-items:center; gap:5px;
+  padding:6px 11px; font-size:11px; font-weight:500; border:1px solid var(--border);
+  background:none; border-radius:6px; cursor:pointer; color:var(--text);
+  transition:all .15s; white-space:nowrap; min-height:34px;
 }
 .tool-btn:hover { background:var(--bg); }
-.tool-btn.active { background:var(--accent); border-color:var(--accent); color:#111; font-weight:600; }
-.sep { width:1px; height:20px; background:var(--border); margin:0 4px; }
-.clear-btn {
-  padding:4px 12px; font-size:11px; border:1px solid var(--border); background:none;
-  border-radius:5px; cursor:pointer; color:var(--muted); transition:all .15s; margin-left:auto;
-}
+.tool-btn.active { background:var(--accent); border-color:var(--accent); color:#111; }
+.tool-icon { font-size:14px; line-height:1; }
+.tool-label-sm { display:none; }
+
+.sep { width:1px; height:22px; background:var(--border); flex-shrink:0; align-self:center; }
+
+.hint-text { font-size:10px; color:var(--muted); flex:1; min-width:0; line-height:1.5; }
+
+.zoom-group { display:flex; align-items:center; gap:3px; flex-shrink:0; }
+.zoom-btn { width:28px; height:28px; border:1px solid var(--border); background:none; border-radius:5px; cursor:pointer; font-size:14px; color:var(--text); display:flex; align-items:center; justify-content:center; transition:all .15s; }
+.zoom-btn:hover { background:var(--bg); }
+#zoom-val { font-size:11px; color:var(--muted); min-width:36px; text-align:center; }
+.zoom-reset { width:auto !important; padding:0 6px; font-size:10px; font-weight:600; color:var(--muted); }
+
+.clear-btn { padding:6px 12px; font-size:11px; border:1px solid var(--border); background:none; border-radius:6px; cursor:pointer; color:var(--muted); transition:all .15s; white-space:nowrap; min-height:34px; }
 .clear-btn:hover { color:#c0392b; border-color:#c0392b; }
-.hint { font-size:11px; color:var(--muted); letter-spacing:.02em; white-space:nowrap; }
+
+/* ── PLAYER EDIT OVERLAY ── */
+#player-edit {
+  display:none; position:fixed; z-index:300;
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:10px; padding:12px; box-shadow:0 4px 20px rgba(0,0,0,.18);
+  flex-direction:column; gap:8px; min-width:110px;
+}
+#player-edit.show { display:flex; }
+#player-edit-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+#player-num-input {
+  width:100%; padding:6px 8px; border:1px solid var(--border); border-radius:6px;
+  font-size:22px; font-weight:700; text-align:center; outline:none;
+  transition:border-color .15s;
+}
+#player-num-input:focus { border-color:var(--accent); }
+.edit-row { display:flex; gap:5px; }
+.edit-ok { flex:1; padding:6px; background:var(--accent); border:none; border-radius:5px; cursor:pointer; font-size:12px; font-weight:700; }
+.edit-ok:hover { opacity:.85; }
+.edit-cancel { flex:1; padding:6px; background:none; border:1px solid var(--border); border-radius:5px; cursor:pointer; font-size:12px; color:var(--muted); }
+.edit-cancel:hover { background:var(--bg); }
 
 /* ── TOOLTIP ── */
-#tip {
-  position:fixed; background:#111; color:#fff; font-size:11px; padding:4px 9px;
-  border-radius:4px; pointer-events:none; opacity:0; transition:opacity .12s; z-index:99; white-space:nowrap;
+#tip { position:fixed; background:#111; color:#fff; font-size:11px; padding:4px 9px; border-radius:4px; pointer-events:none; opacity:0; transition:opacity .12s; z-index:99; white-space:nowrap; }
+
+/* ── MOBILE ── */
+@media (max-width:600px) {
+  header { padding:6px 12px; gap:8px; }
+  .form-wrap { order:3; width:100%; padding-bottom:2px; }
+  .mode-tabs { order:1; }
+  .count-ctrl { order:2; margin-left:auto; }
+
+  footer { padding:6px 10px; gap:6px; }
+  .hint-text { display:none; }
+  .sep.sep-hint { display:none; }
+  .tool-btn { padding:7px 10px; }
+  .tool-label-sm { display:inline; }
+
+  .zoom-group { margin-left:auto; }
+}
+@media (max-width:380px) {
+  .tool-btn { padding:7px 8px; font-size:10px; }
+  .vs-badge { display:none; }
 }
 </style>
 </head>
@@ -82,20 +128,28 @@ footer {
 
 <div id="tip"></div>
 
+<!-- Player number editor -->
+<div id="player-edit">
+  <div id="player-edit-label">등번호 수정</div>
+  <input type="number" id="player-num-input" min="1" max="99" maxlength="2">
+  <div class="edit-row">
+    <button class="edit-ok" onclick="confirmPlayerEdit()">확인</button>
+    <button class="edit-cancel" onclick="closePlayerEdit()">취소</button>
+  </div>
+</div>
+
 <header>
   <div class="mode-tabs">
     <button class="mode-btn active" id="m-soccer" onclick="setMode('soccer')">축구</button>
     <button class="mode-btn" id="m-futsal" onclick="setMode('futsal')">풋살</button>
   </div>
-
   <div class="form-wrap">
     <select class="form-select" id="home-form" onchange="applyFormation('home',this.value)"></select>
     <span class="vs-badge">HOME · vs · AWAY</span>
     <select class="form-select" id="away-form" onchange="applyFormation('away',this.value)"></select>
   </div>
-
   <div class="count-ctrl">
-    <span class="ctrl-label">인원수</span>
+    <span class="ctrl-label">인원</span>
     <button class="cnt-btn" onclick="changeCount(-1)">−</button>
     <span id="count-val">11</span>
     <button class="cnt-btn" onclick="changeCount(1)">+</button>
@@ -109,125 +163,109 @@ footer {
 </main>
 
 <footer>
-  <span class="hint">좌드래그: 선수 이동 · 우드래그: 화살표 · 우클릭 두 번: 존 생성 · 스크롤: 확대/축소 · Esc: 취소</span>
-  <div class="sep"></div>
-  <div class="tool-btns">
-    <button class="tool-btn" onclick="changeZoom(-.2)">−</button>
-    <span id="zoom-val" style="font-size:11px;color:var(--muted);min-width:36px;text-align:center;">100%</span>
-    <button class="tool-btn" onclick="changeZoom(.2)">+</button>
-    <button class="tool-btn" onclick="resetZoom()" style="font-size:10px;color:var(--muted);">리셋</button>
+  <div class="tool-group">
+    <button class="tool-btn active" id="tool-arrow" onclick="setTool('arrow')"
+      title="화살표 도구: 빈 공간을 드래그해 화살표를 그립니다 (데스크톱: 기본 동작)">
+      <span class="tool-icon">↗</span>
+      <span>화살표</span>
+    </button>
+    <button class="tool-btn" id="tool-zone" onclick="setTool('zone')"
+      title="존 도구: 빈 공간을 드래그해 구역을 표시합니다 (데스크톱: 우클릭 드래그)">
+      <span class="tool-icon">▭</span>
+      <span>존</span>
+    </button>
   </div>
-  <button class="clear-btn" onclick="clearAll()">전체 지우기</button>
+  <div class="sep sep-hint"></div>
+  <span class="hint-text" id="hint-text">
+    선수 드래그: 이동 &nbsp;·&nbsp; 빈 공간 드래그: 화살표 &nbsp;·&nbsp; 우클릭 드래그: 존 &nbsp;·&nbsp; 선수 클릭: 번호 수정
+  </span>
+  <div class="sep"></div>
+  <div class="zoom-group">
+    <button class="zoom-btn" onclick="changeZoom(-.2)" title="축소">−</button>
+    <span id="zoom-val">100%</span>
+    <button class="zoom-btn" onclick="changeZoom(.2)" title="확대">+</button>
+    <button class="zoom-btn zoom-reset" onclick="resetZoom()" title="줌 리셋">리셋</button>
+  </div>
+  <div class="sep"></div>
+  <button class="clear-btn" onclick="clearAll()" title="화살표와 존을 모두 지웁니다">지우기</button>
 </footer>
 
 <script>
-// ── FORMATION DATA ──────────────────────────────────────────────────
-// xy: [x,y] normalized 0-1, y=0 top (opponent goal), y=1 bottom (own GK)
+// ── FORMATION DATA ────────────────────────────────────────────────────
+// Curated list: common formations per player count
+const CURATED = {
+  11: ['4-3-3','4-4-2','4-2-3-1','3-5-2','5-3-2','4-5-1','3-4-3'],
+  7:  ['2-3-1','3-2-1','2-2-2'],
+  5:  ['1-2-1','2-2','3-1','1-3'],
+};
+const FORMATION_LABELS = {
+  '4-3-3':'4–3–3', '4-4-2':'4–4–2', '4-2-3-1':'4–2–3–1',
+  '3-5-2':'3–5–2', '5-3-2':'5–3–2', '4-5-1':'4–5–1', '3-4-3':'3–4–3',
+  '2-3-1':'2–3–1', '3-2-1':'3–2–1', '2-2-2':'2–2–2',
+  '1-2-1':'1–2–1 (다이아몬드)', '2-2':'2–2 (박스)', '3-1':'3–1 (수비형)', '1-3':'1–3 (공격형)',
+};
+
 const PRESETS = {
   11: [
-    { key:'4-4-2', label:'4–4–2', p:[
-      {n:1,pos:'GK',xy:[.50,.94]},
-      {n:2,pos:'RB',xy:[.82,.78]},{n:5,pos:'CB',xy:[.62,.80]},{n:6,pos:'CB',xy:[.38,.80]},{n:3,pos:'LB',xy:[.18,.78]},
-      {n:7,pos:'RM',xy:[.82,.55]},{n:8,pos:'CM',xy:[.62,.53]},{n:4,pos:'CM',xy:[.38,.53]},{n:11,pos:'LM',xy:[.18,.55]},
-      {n:9,pos:'ST',xy:[.62,.27]},{n:10,pos:'ST',xy:[.38,.27]}
-    ]},
-    { key:'4-3-3', label:'4–3–3', p:[
+    { key:'4-3-3', p:[
       {n:1,pos:'GK',xy:[.50,.94]},
       {n:2,pos:'RB',xy:[.82,.78]},{n:5,pos:'CB',xy:[.62,.79]},{n:6,pos:'CB',xy:[.38,.79]},{n:3,pos:'LB',xy:[.18,.78]},
       {n:8,pos:'CM',xy:[.72,.57]},{n:4,pos:'CDM',xy:[.50,.54]},{n:10,pos:'CM',xy:[.28,.57]},
       {n:7,pos:'RW',xy:[.78,.28]},{n:9,pos:'ST',xy:[.50,.23]},{n:11,pos:'LW',xy:[.22,.28]}
     ]},
-    { key:'4-2-3-1', label:'4–2–3–1', p:[
+    { key:'4-4-2', p:[
+      {n:1,pos:'GK',xy:[.50,.94]},
+      {n:2,pos:'RB',xy:[.82,.78]},{n:5,pos:'CB',xy:[.62,.80]},{n:6,pos:'CB',xy:[.38,.80]},{n:3,pos:'LB',xy:[.18,.78]},
+      {n:7,pos:'RM',xy:[.82,.55]},{n:8,pos:'CM',xy:[.62,.53]},{n:4,pos:'CM',xy:[.38,.53]},{n:11,pos:'LM',xy:[.18,.55]},
+      {n:9,pos:'ST',xy:[.62,.27]},{n:10,pos:'ST',xy:[.38,.27]}
+    ]},
+    { key:'4-2-3-1', p:[
       {n:1,pos:'GK',xy:[.50,.94]},
       {n:2,pos:'RB',xy:[.82,.78]},{n:5,pos:'CB',xy:[.62,.79]},{n:6,pos:'CB',xy:[.38,.79]},{n:3,pos:'LB',xy:[.18,.78]},
       {n:4,pos:'CDM',xy:[.63,.62]},{n:8,pos:'CDM',xy:[.37,.62]},
       {n:7,pos:'RAM',xy:[.78,.42]},{n:10,pos:'CAM',xy:[.50,.40]},{n:11,pos:'LAM',xy:[.22,.42]},
       {n:9,pos:'ST',xy:[.50,.22]}
     ]},
-    { key:'4-3-2-1', label:'4–3–2–1', p:[
-      {n:1,pos:'GK',xy:[.50,.94]},
-      {n:2,pos:'RB',xy:[.82,.78]},{n:5,pos:'CB',xy:[.62,.79]},{n:6,pos:'CB',xy:[.38,.79]},{n:3,pos:'LB',xy:[.18,.78]},
-      {n:4,pos:'CM',xy:[.70,.60]},{n:8,pos:'CM',xy:[.50,.58]},{n:10,pos:'CM',xy:[.30,.60]},
-      {n:7,pos:'SS',xy:[.65,.38]},{n:11,pos:'SS',xy:[.35,.38]},
-      {n:9,pos:'ST',xy:[.50,.22]}
-    ]},
-    { key:'4-1-4-1', label:'4–1–4–1', p:[
-      {n:1,pos:'GK',xy:[.50,.94]},
-      {n:2,pos:'RB',xy:[.82,.78]},{n:5,pos:'CB',xy:[.62,.79]},{n:6,pos:'CB',xy:[.38,.79]},{n:3,pos:'LB',xy:[.18,.78]},
-      {n:4,pos:'CDM',xy:[.50,.64]},
-      {n:7,pos:'RM',xy:[.82,.47]},{n:8,pos:'CM',xy:[.62,.45]},{n:10,pos:'CM',xy:[.38,.45]},{n:11,pos:'LM',xy:[.18,.47]},
-      {n:9,pos:'ST',xy:[.50,.22]}
-    ]},
-    { key:'4-5-1', label:'4–5–1', p:[
-      {n:1,pos:'GK',xy:[.50,.94]},
-      {n:2,pos:'RB',xy:[.82,.78]},{n:5,pos:'CB',xy:[.62,.79]},{n:6,pos:'CB',xy:[.38,.79]},{n:3,pos:'LB',xy:[.18,.78]},
-      {n:7,pos:'RM',xy:[.88,.53]},{n:8,pos:'CM',xy:[.70,.51]},{n:4,pos:'CM',xy:[.50,.49]},{n:10,pos:'CM',xy:[.30,.51]},{n:11,pos:'LM',xy:[.12,.53]},
-      {n:9,pos:'ST',xy:[.50,.22]}
-    ]},
-    { key:'3-5-2', label:'3–5–2', p:[
+    { key:'3-5-2', p:[
       {n:1,pos:'GK',xy:[.50,.94]},
       {n:5,pos:'CB',xy:[.70,.80]},{n:4,pos:'CB',xy:[.50,.82]},{n:6,pos:'CB',xy:[.30,.80]},
       {n:2,pos:'WB',xy:[.88,.58]},{n:8,pos:'CM',xy:[.67,.55]},{n:10,pos:'CM',xy:[.50,.52]},{n:7,pos:'CM',xy:[.33,.55]},{n:3,pos:'WB',xy:[.12,.58]},
       {n:9,pos:'ST',xy:[.62,.25]},{n:11,pos:'ST',xy:[.38,.25]}
     ]},
-    { key:'3-4-3', label:'3–4–3', p:[
-      {n:1,pos:'GK',xy:[.50,.94]},
-      {n:5,pos:'CB',xy:[.70,.80]},{n:4,pos:'CB',xy:[.50,.82]},{n:6,pos:'CB',xy:[.30,.80]},
-      {n:2,pos:'RM',xy:[.82,.57]},{n:8,pos:'CM',xy:[.60,.55]},{n:10,pos:'CM',xy:[.40,.55]},{n:3,pos:'LM',xy:[.18,.57]},
-      {n:7,pos:'RW',xy:[.78,.28]},{n:9,pos:'ST',xy:[.50,.23]},{n:11,pos:'LW',xy:[.22,.28]}
-    ]},
-    { key:'3-4-2-1', label:'3–4–2–1', p:[
-      {n:1,pos:'GK',xy:[.50,.94]},
-      {n:5,pos:'CB',xy:[.70,.80]},{n:4,pos:'CB',xy:[.50,.82]},{n:6,pos:'CB',xy:[.30,.80]},
-      {n:2,pos:'RM',xy:[.82,.58]},{n:8,pos:'CM',xy:[.60,.55]},{n:10,pos:'CM',xy:[.40,.55]},{n:3,pos:'LM',xy:[.18,.58]},
-      {n:7,pos:'SS',xy:[.65,.35]},{n:11,pos:'SS',xy:[.35,.35]},
-      {n:9,pos:'ST',xy:[.50,.22]}
-    ]},
-    { key:'5-3-2', label:'5–3–2', p:[
+    { key:'5-3-2', p:[
       {n:1,pos:'GK',xy:[.50,.94]},
       {n:2,pos:'RWB',xy:[.88,.74]},{n:4,pos:'CB',xy:[.71,.80]},{n:5,pos:'CB',xy:[.50,.82]},{n:6,pos:'CB',xy:[.29,.80]},{n:3,pos:'LWB',xy:[.12,.74]},
       {n:8,pos:'CM',xy:[.67,.55]},{n:10,pos:'CM',xy:[.50,.53]},{n:7,pos:'CM',xy:[.33,.55]},
       {n:9,pos:'ST',xy:[.63,.25]},{n:11,pos:'ST',xy:[.37,.25]}
     ]},
-    { key:'5-4-1', label:'5–4–1', p:[
+    { key:'4-5-1', p:[
       {n:1,pos:'GK',xy:[.50,.94]},
-      {n:2,pos:'RWB',xy:[.88,.74]},{n:4,pos:'CB',xy:[.71,.80]},{n:5,pos:'CB',xy:[.50,.82]},{n:6,pos:'CB',xy:[.29,.80]},{n:3,pos:'LWB',xy:[.12,.74]},
-      {n:7,pos:'RM',xy:[.82,.52]},{n:8,pos:'CM',xy:[.61,.50]},{n:10,pos:'CM',xy:[.39,.50]},{n:11,pos:'LM',xy:[.18,.52]},
+      {n:2,pos:'RB',xy:[.82,.78]},{n:5,pos:'CB',xy:[.62,.79]},{n:6,pos:'CB',xy:[.38,.79]},{n:3,pos:'LB',xy:[.18,.78]},
+      {n:7,pos:'RM',xy:[.88,.53]},{n:8,pos:'CM',xy:[.70,.51]},{n:4,pos:'CM',xy:[.50,.49]},{n:10,pos:'CM',xy:[.30,.51]},{n:11,pos:'LM',xy:[.12,.53]},
       {n:9,pos:'ST',xy:[.50,.22]}
     ]},
-    { key:'5-2-3', label:'5–2–3', p:[
+    { key:'3-4-3', p:[
       {n:1,pos:'GK',xy:[.50,.94]},
-      {n:2,pos:'RWB',xy:[.88,.74]},{n:4,pos:'CB',xy:[.71,.80]},{n:5,pos:'CB',xy:[.50,.82]},{n:6,pos:'CB',xy:[.29,.80]},{n:3,pos:'LWB',xy:[.12,.74]},
-      {n:8,pos:'CM',xy:[.63,.55]},{n:10,pos:'CM',xy:[.37,.55]},
-      {n:7,pos:'RW',xy:[.80,.28]},{n:9,pos:'ST',xy:[.50,.23]},{n:11,pos:'LW',xy:[.20,.28]}
+      {n:5,pos:'CB',xy:[.70,.80]},{n:4,pos:'CB',xy:[.50,.82]},{n:6,pos:'CB',xy:[.30,.80]},
+      {n:2,pos:'RM',xy:[.82,.57]},{n:8,pos:'CM',xy:[.60,.55]},{n:10,pos:'CM',xy:[.40,.55]},{n:3,pos:'LM',xy:[.18,.57]},
+      {n:7,pos:'RW',xy:[.78,.28]},{n:9,pos:'ST',xy:[.50,.23]},{n:11,pos:'LW',xy:[.22,.28]}
     ]},
   ],
 
   7: [
-    { key:'2-3-1', label:'2–3–1', p:[
+    { key:'2-3-1', p:[
       {n:1,pos:'GK',xy:[.50,.93]},
       {n:4,pos:'CB',xy:[.66,.76]},{n:5,pos:'CB',xy:[.34,.76]},
       {n:2,pos:'RM',xy:[.80,.52]},{n:8,pos:'CM',xy:[.50,.50]},{n:3,pos:'LM',xy:[.20,.52]},
       {n:9,pos:'ST',xy:[.50,.25]}
     ]},
-    { key:'3-2-1', label:'3–2–1', p:[
+    { key:'3-2-1', p:[
       {n:1,pos:'GK',xy:[.50,.93]},
       {n:2,pos:'RB',xy:[.75,.76]},{n:5,pos:'CB',xy:[.50,.78]},{n:3,pos:'LB',xy:[.25,.76]},
       {n:8,pos:'CM',xy:[.64,.52]},{n:10,pos:'CM',xy:[.36,.52]},
       {n:9,pos:'ST',xy:[.50,.25]}
     ]},
-    { key:'1-3-2', label:'1–3–2', p:[
-      {n:1,pos:'GK',xy:[.50,.93]},
-      {n:5,pos:'SW',xy:[.50,.78]},
-      {n:2,pos:'RM',xy:[.78,.55]},{n:8,pos:'CM',xy:[.50,.53]},{n:3,pos:'LM',xy:[.22,.55]},
-      {n:9,pos:'ST',xy:[.65,.27]},{n:11,pos:'ST',xy:[.35,.27]}
-    ]},
-    { key:'3-3', label:'3–3', p:[
-      {n:1,pos:'GK',xy:[.50,.93]},
-      {n:2,pos:'RB',xy:[.75,.76]},{n:5,pos:'CB',xy:[.50,.78]},{n:3,pos:'LB',xy:[.25,.76]},
-      {n:7,pos:'RW',xy:[.75,.34]},{n:9,pos:'ST',xy:[.50,.29]},{n:11,pos:'LW',xy:[.25,.34]}
-    ]},
-    { key:'2-2-2', label:'2–2–2', p:[
+    { key:'2-2-2', p:[
       {n:1,pos:'GK',xy:[.50,.93]},
       {n:4,pos:'CB',xy:[.65,.76]},{n:5,pos:'CB',xy:[.35,.76]},
       {n:8,pos:'CM',xy:[.65,.52]},{n:10,pos:'CM',xy:[.35,.52]},
@@ -236,66 +274,117 @@ const PRESETS = {
   ],
 
   5: [
-    { key:'1-2-1', label:'1–2–1 (다이아몬드)', p:[
+    { key:'1-2-1', p:[
       {n:1,pos:'GK',xy:[.50,.92]},
       {n:4,pos:'FIX',xy:[.50,.67]},
       {n:2,pos:'ALA',xy:[.75,.45]},{n:3,pos:'ALA',xy:[.25,.45]},
       {n:9,pos:'PVT',xy:[.50,.23]}
     ]},
-    { key:'2-2', label:'2–2 (박스)', p:[
+    { key:'2-2', p:[
       {n:1,pos:'GK',xy:[.50,.92]},
       {n:4,pos:'FD',xy:[.68,.67]},{n:5,pos:'FD',xy:[.32,.67]},
       {n:2,pos:'ALA',xy:[.68,.35]},{n:3,pos:'ALA',xy:[.32,.35]}
     ]},
-    { key:'3-1', label:'3–1 (수비형)', p:[
+    { key:'3-1', p:[
       {n:1,pos:'GK',xy:[.50,.92]},
       {n:4,pos:'FD',xy:[.72,.67]},{n:5,pos:'FD',xy:[.50,.72]},{n:3,pos:'FD',xy:[.28,.67]},
       {n:9,pos:'PVT',xy:[.50,.28]}
     ]},
-    { key:'1-3', label:'1–3 (공격형)', p:[
+    { key:'1-3', p:[
       {n:1,pos:'GK',xy:[.50,.92]},
       {n:4,pos:'FIX',xy:[.50,.70]},
       {n:7,pos:'ALA',xy:[.75,.38]},{n:9,pos:'PVT',xy:[.50,.28]},{n:11,pos:'ALA',xy:[.25,.38]}
     ]},
-    { key:'4-0', label:'4–0 (전진형)', p:[
-      {n:1,pos:'GK',xy:[.50,.92]},
-      {n:4,pos:'FD',xy:[.75,.60]},{n:5,pos:'FD',xy:[.25,.60]},
-      {n:9,pos:'ALA',xy:[.75,.32]},{n:11,pos:'ALA',xy:[.25,.32]}
-    ]},
   ],
 };
 
-// ── STATE ───────────────────────────────────────────────────────────
-let mode = 'soccer';     // 'soccer' | 'futsal'
+// ── FORMATION UTILS ───────────────────────────────────────────────────
+function autoFormCoords(rows) {
+  const ROW_Y = {1:[.50],2:[.74,.30],3:[.77,.53,.28],4:[.79,.61,.43,.24]};
+  const ys = ROW_Y[rows.length] || [.50];
+  const posLabel = r => r===0?'DEF':r===rows.length-1?'FWD':'MID';
+  const players = [{n:1,pos:'GK',xy:[.5,.93]}];
+  let num = 2;
+  rows.forEach((count,r) => {
+    for (let i=0;i<count;i++) {
+      const margin = [.32,.22,.16,.13,.10][count-1]??0.10;
+      const x = count===1 ? .5 : margin+(1-2*margin)/(count-1)*i;
+      players.push({n:num++, pos:posLabel(r), xy:[x,ys[r]]});
+    }
+  });
+  return players;
+}
+
+function listFormations(n) {
+  if (n <= 1) return [{key:'gk', label:'GK 단독'}];
+  const curated = CURATED[n];
+  if (curated) return curated.map(k => ({key:k, label:FORMATION_LABELS[k]||k.replace(/-/g,'–')}));
+  // 그 외 인원수: 간단한 자동 생성 (최대 5개)
+  const out = n - 1, maxRows = Math.min(3, out);
+  const found = [];
+  function gen(rem, rl, cur) {
+    if (rem===0&&cur.length>0){found.push([...cur]);return;}
+    if (rl===0||rem===0) return;
+    const mx=Math.min(Math.min(5,rem),rem-Math.max(0,rl-1));
+    for(let i=1;i<=mx;i++){cur.push(i);gen(rem-i,rl-1,cur);cur.pop();}
+  }
+  gen(out, maxRows, []);
+  found.sort((a,b)=>a.length!==b.length?a.length-b.length:b[0]-a[0]);
+  return found.slice(0,5).map(rows=>({key:rows.join('-'),label:rows.join('–')}));
+}
+
+function coordsForFormation(key) {
+  if (key==='gk') return [{n:1,pos:'GK',xy:[.5,.93]}];
+  const preset = (PRESETS[playerCount]||[]).find(p=>p.key===key);
+  if (preset) return preset.p.map(p=>({...p}));
+  const rows = key.split('-').map(Number);
+  if (rows.some(isNaN)||rows.reduce((a,b)=>a+b,0)!==playerCount-1)
+    return autoFormCoords(listFormations(playerCount)[0]?.key.split('-').map(Number)||[playerCount-1]);
+  return autoFormCoords(rows);
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────
+let mode = 'soccer';
 let playerCount = 11;
 let zoom = 1.0;
 let homePlayers = [];
 let awayPlayers = [];
 let arrows = [];
 let zones = [];
-let dragging = null;
-let rcStart = null;      // right mousedown position
-let zoneCorner1 = null;  // first corner of zone in progress
+let ball = {_norm:[.5,.5], x:0, y:0};
+let activeTool = 'arrow'; // 'arrow' | 'zone'
+
+// Drag state
+let dragState = null;
+// {
+//   type: 'move' | 'arrow' | 'zone',
+//   startX, startY,   // canvas coords at start
+//   moved: bool,
+//   // move: team, idx, ox, oy
+//   // arrow/zone: fx, fy
+// }
+
+// Player edit
+let editTarget = null; // {team, idx}
+
 let mousePos = {x:0, y:0};
 
-// ── CANVAS ──────────────────────────────────────────────────────────
+// ── CANVAS ────────────────────────────────────────────────────────────
 const canvas = document.getElementById('pitch');
 const ctx = canvas.getContext('2d');
 const container = document.getElementById('pitch-container');
 
-function pitchRatio() {
-  // width:height
-  return mode === 'futsal' ? 20/40 : 68/105;
-}
+function pitchRatio() { return mode==='futsal' ? 20/40 : 68/105; }
 
 function resize() {
-  const headerH = 50, footerH = 44, pad = 40;
+  const headerH = document.querySelector('header').offsetHeight;
+  const footerH = document.querySelector('footer').offsetHeight;
+  const pad = 32;
   const avH = window.innerHeight - headerH - footerH - pad;
   const avW = window.innerWidth - pad;
   const ratio = pitchRatio();
   let h = avH, w = h * ratio;
   if (w > avW) { w = avW; h = w / ratio; }
-  // Apply zoom
   canvas.width = Math.floor(w * zoom);
   canvas.height = Math.floor(h * zoom);
   container.style.width = canvas.width + 'px';
@@ -304,235 +393,214 @@ function resize() {
   render();
 }
 
-// ── FORMATION GENERATION ─────────────────────────────────────────────
-
-// Generate all meaningful ordered partitions of (n-1) into 1-4 rows, max 5 per row
-function listFormations(n) {
-  const out = n - 1;
-  if (out <= 0) return [{key:'gk', label:'GK 단독'}];
-
-  const maxPerRow = Math.min(5, out);
-  const maxRows = Math.min(4, out);
-  const found = [];
-
-  function gen(rem, rowsLeft, cur) {
-    if (rem === 0 && cur.length > 0) { found.push([...cur]); return; }
-    if (rowsLeft === 0 || rem === 0) return;
-    const maxHere = Math.min(maxPerRow, rem - Math.max(0, rowsLeft - 1));
-    for (let i = 1; i <= maxHere; i++) {
-      cur.push(i);
-      gen(rem - i, rowsLeft - 1, cur);
-      cur.pop();
-    }
-  }
-  gen(out, maxRows, []);
-
-  // Sort: fewer rows first, then by first row descending (def-heavy first)
-  found.sort((a, b) => {
-    if (a.length !== b.length) return a.length - b.length;
-    for (let i = 0; i < a.length; i++) { if (a[i] !== b[i]) return b[i] - a[i]; }
-    return 0;
-  });
-
-  return found.map(rows => ({ key: rows.join('-'), label: rows.join('–') }));
-}
-
-// Auto-generate player positions for a rows array (e.g. [4,3,3])
-function autoFormCoords(rows) {
-  const ROW_Y = { 1:[.50], 2:[.74,.30], 3:[.77,.53,.28], 4:[.79,.61,.43,.24] };
-  const ys = ROW_Y[rows.length] || [.50];
-  const posLabel = (r) => rows.length <= 1 ? 'FWD' : r === 0 ? 'DEF' : r === rows.length-1 ? 'FWD' : 'MID';
-  const players = [{n:1, pos:'GK', xy:[.5,.93]}];
-  let num = 2;
-  rows.forEach((count, r) => {
-    for (let i = 0; i < count; i++) {
-      const margin = [.32,.22,.16,.13,.10][count-1] ?? .10;
-      const x = count === 1 ? .5 : margin + (1-2*margin)/(count-1)*i;
-      players.push({n: num++, pos: posLabel(r), xy:[x, ys[r]]});
-    }
-  });
-  return players;
-}
-
-// ── FORMATION / PLAYER INIT ──────────────────────────────────────────
-
-function buildFormSelects() {
-  const options = listFormations(playerCount);
-  ['home-form','away-form'].forEach(id => {
-    const sel = document.getElementById(id);
-    const prev = sel.value;
-    sel.innerHTML = '';
-    options.forEach(({key, label}) => {
-      const opt = document.createElement('option');
-      opt.value = key; opt.textContent = label;
-      sel.appendChild(opt);
-    });
-    if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
-  });
-}
-
-function coordsForFormation(key) {
-  if (key === 'gk') return [{n:1, pos:'GK', xy:[.5,.93]}];
-  // Check hand-crafted PRESETS for nicely tuned coords
-  const preset = (PRESETS[playerCount] || []).find(p => p.key === key);
-  if (preset) return preset.p.map(p => ({...p}));
-  // Auto-generate from key string e.g. "4-3-3"
-  const rows = key.split('-').map(Number);
-  if (rows.some(isNaN) || rows.reduce((a,b)=>a+b,0) !== playerCount-1) {
-    return autoFormCoords(listFormations(playerCount)[0]?.key.split('-').map(Number) || [playerCount-1]);
-  }
-  return autoFormCoords(rows);
-}
-
-function normToCanvas(xy) {
-  return {x: xy[0] * canvas.width, y: xy[1] * canvas.height};
-}
+// ── PLAYERS ───────────────────────────────────────────────────────────
+function normToCanvas(xy) { return {x:xy[0]*canvas.width, y:xy[1]*canvas.height}; }
 
 function positionPlayersFromNorm() {
-  homePlayers.forEach(p => { const c = normToCanvas(p._norm); p.x = c.x; p.y = c.y; });
-  awayPlayers.forEach(p => { const c = normToCanvas(p._norm); p.x = c.x; p.y = c.y; });
+  homePlayers.forEach(p=>{ const c=normToCanvas(p._norm); p.x=c.x; p.y=c.y; });
+  awayPlayers.forEach(p=>{ const c=normToCanvas(p._norm); p.x=c.x; p.y=c.y; });
+  const cb=normToCanvas(ball._norm); ball.x=cb.x; ball.y=cb.y;
 }
 
 function buildPlayers(key, mirror) {
   const specs = coordsForFormation(key);
-  return specs.map(s => {
-    const norm = mirror ? [s.xy[0], 1 - s.xy[1]] : [...s.xy];
+  return specs.map(s=>{
+    const norm = mirror ? [s.xy[0], 1-s.xy[1]] : [...s.xy];
     const c = normToCanvas(norm);
-    return {n: s.n, pos: s.pos, _norm: norm, x: c.x, y: c.y};
+    return {n:s.n, pos:s.pos, _norm:norm, x:c.x, y:c.y};
+  });
+}
+
+function buildFormSelects() {
+  const options = listFormations(playerCount);
+  ['home-form','away-form'].forEach(id=>{
+    const sel = document.getElementById(id);
+    const prev = sel.value;
+    sel.innerHTML = '';
+    options.forEach(({key,label})=>{
+      const opt = document.createElement('option');
+      opt.value=key; opt.textContent=label; sel.appendChild(opt);
+    });
+    if ([...sel.options].some(o=>o.value===prev)) sel.value = prev;
   });
 }
 
 function applyFormation(team, key) {
-  if (team === 'home') homePlayers = buildPlayers(key, false);
+  if (team==='home') homePlayers = buildPlayers(key, false);
   else awayPlayers = buildPlayers(key, true);
-  arrows = []; zones = [];
-  render();
+  arrows=[]; zones=[]; ball={_norm:[.5,.5],x:0,y:0}; render();
 }
 
 function initBoard() {
   buildFormSelects();
-  const firstKey = () => listFormations(playerCount)[0]?.key || 'gk';
-  const hKey = document.getElementById('home-form').value || firstKey();
-  const aKey = document.getElementById('away-form').value || firstKey();
-  homePlayers = buildPlayers(hKey, false);
-  awayPlayers = buildPlayers(aKey, true);
-  arrows = []; zones = [];
-  render();
+  const firstKey = ()=>listFormations(playerCount)[0]?.key||'gk';
+  homePlayers = buildPlayers(document.getElementById('home-form').value||firstKey(), false);
+  awayPlayers = buildPlayers(document.getElementById('away-form').value||firstKey(), true);
+  arrows=[]; zones=[]; render();
 }
 
-// ── DRAW ─────────────────────────────────────────────────────────────
-function drawSoccerPitch() {
-  const W = canvas.width, H = canvas.height;
-  const lc = 'rgba(255,255,255,.22)';
-  // Background + stripes
-  ctx.fillStyle = '#1C3B2A'; ctx.fillRect(0,0,W,H);
-  for (let i = 0; i < 8; i++) {
-    ctx.fillStyle = i%2===0 ? 'rgba(0,0,0,.055)' : 'transparent';
-    ctx.fillRect(0, i*H/8, W, H/8);
+function getPlayer(team,idx) { return team==='home'?homePlayers[idx]:awayPlayers[idx]; }
+
+function playerAt(x, y) {
+  const r2 = (Math.max(10, Math.min(14, canvas.width*.035)) + 4) ** 2;
+  for (let i=homePlayers.length-1;i>=0;i--) {
+    const p=homePlayers[i]; if((x-p.x)**2+(y-p.y)**2<r2) return {team:'home',idx:i};
   }
-  ctx.strokeStyle = lc; ctx.lineWidth = 1;
-  const px = W*.065, py = H*.04;
-  ctx.strokeRect(px, py, W-px*2, H-py*2);
-  // Center
+  for (let i=awayPlayers.length-1;i>=0;i--) {
+    const p=awayPlayers[i]; if((x-p.x)**2+(y-p.y)**2<r2) return {team:'away',idx:i};
+  }
+  return null;
+}
+
+// ── PITCH DRAWING (simplified) ────────────────────────────────────────
+function drawSoccerPitch() {
+  const W=canvas.width, H=canvas.height;
+  const lc='rgba(255,255,255,.32)';
+  ctx.fillStyle='#2A4D35'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle=lc; ctx.lineWidth=1.5;
+
+  const px=W*.06, py=H*.04;
+  const fw=W-px*2, fh=H-py*2;
+
+  // Field outline
+  ctx.strokeRect(px, py, fw, fh);
+  // Center line
   ctx.beginPath(); ctx.moveTo(px, H/2); ctx.lineTo(W-px, H/2); ctx.stroke();
-  ctx.beginPath(); ctx.arc(W/2, H/2, W*.13, 0, Math.PI*2); ctx.stroke();
-  ctx.fillStyle = lc; ctx.beginPath(); ctx.arc(W/2, H/2, 2.5, 0, Math.PI*2); ctx.fill();
+  // Center circle + dot
+  ctx.beginPath(); ctx.arc(W/2, H/2, W*.12, 0, Math.PI*2); ctx.stroke();
+  ctx.fillStyle=lc; ctx.beginPath(); ctx.arc(W/2, H/2, 2.5, 0, Math.PI*2); ctx.fill();
+
   // Penalty areas
-  const pw = W*.52, ph = H*.16;
-  ctx.strokeStyle = lc;
+  const pw=W*.50, ph=H*.155;
+  ctx.strokeStyle=lc;
   ctx.strokeRect((W-pw)/2, py, pw, ph);
   ctx.strokeRect((W-pw)/2, H-py-ph, pw, ph);
+
   // Goal areas
-  const gw = W*.28, gh = H*.06;
+  const gw=W*.26, gh=H*.055;
   ctx.strokeRect((W-gw)/2, py, gw, gh);
   ctx.strokeRect((W-gw)/2, H-py-gh, gw, gh);
+
   // Goals
-  const glw = W*.14, glh = H*.025;
-  ctx.strokeStyle = 'rgba(255,255,255,.45)';
+  const glw=W*.13, glh=H*.022;
+  ctx.strokeStyle='rgba(255,255,255,.5)';
   ctx.strokeRect((W-glw)/2, py-glh, glw, glh);
   ctx.strokeRect((W-glw)/2, H-py, glw, glh);
-  // Spots & arcs
-  ctx.strokeStyle = lc; ctx.fillStyle = lc;
-  ctx.beginPath(); ctx.arc(W/2, py+H*.11, 2, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(W/2, H-py-H*.11, 2, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(W/2, py+H*.11, W*.12, .2*Math.PI, .8*Math.PI); ctx.stroke();
-  ctx.beginPath(); ctx.arc(W/2, H-py-H*.11, W*.12, 1.2*Math.PI, 1.8*Math.PI); ctx.stroke();
-  // Corner arcs
-  const cr = W*.03;
-  [[px,py],[W-px,py],[W-px,H-py],[px,H-py]].forEach(([cx,cy]) => {
-    const a = Math.atan2(cy<H/2?1:-1, cx<W/2?1:-1);
-    ctx.beginPath(); ctx.arc(cx, cy, cr, a, a+Math.PI/2); ctx.stroke();
-  });
+
+  // Penalty spots
+  ctx.fillStyle=lc;
+  ctx.beginPath(); ctx.arc(W/2, py+H*.11, 2.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W/2, H-py-H*.11, 2.5, 0, Math.PI*2); ctx.fill();
+
+  // Penalty arcs
+  ctx.strokeStyle=lc;
+  ctx.beginPath(); ctx.arc(W/2, py+H*.11, W*.12, .18*Math.PI, .82*Math.PI); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2, H-py-H*.11, W*.12, 1.18*Math.PI, 1.82*Math.PI); ctx.stroke();
 }
 
 function drawFutsalPitch() {
-  const W = canvas.width, H = canvas.height;
-  const lc = 'rgba(255,255,255,.25)';
-  // BG (slightly different color)
-  ctx.fillStyle = '#1A3530'; ctx.fillRect(0,0,W,H);
-  for (let i = 0; i < 6; i++) {
-    ctx.fillStyle = i%2===0 ? 'rgba(0,0,0,.05)' : 'transparent';
-    ctx.fillRect(0, i*H/6, W, H/6);
-  }
-  ctx.strokeStyle = lc; ctx.lineWidth = 1.5;
-  const px = W*.07, py = H*.04;
+  const W=canvas.width, H=canvas.height;
+  const lc='rgba(255,255,255,.32)';
+  ctx.fillStyle='#1F4030'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle=lc; ctx.lineWidth=1.5;
+
+  const px=W*.07, py=H*.04;
   ctx.strokeRect(px, py, W-px*2, H-py*2);
-  // Center
   ctx.beginPath(); ctx.moveTo(px, H/2); ctx.lineTo(W-px, H/2); ctx.stroke();
   ctx.beginPath(); ctx.arc(W/2, H/2, W*.15, 0, Math.PI*2); ctx.stroke();
-  ctx.fillStyle = lc; ctx.beginPath(); ctx.arc(W/2, H/2, 3, 0, Math.PI*2); ctx.fill();
-  // D-shaped penalty areas (semicircle)
-  const r = W*.32;
+  ctx.fillStyle=lc; ctx.beginPath(); ctx.arc(W/2, H/2, 3, 0, Math.PI*2); ctx.fill();
+
+  // D-arcs
+  const r=W*.30;
   ctx.beginPath(); ctx.arc(W/2, py, r, 0, Math.PI); ctx.stroke();
   ctx.beginPath(); ctx.arc(W/2, H-py, r, Math.PI, Math.PI*2); ctx.stroke();
+
   // Goals
-  const gw = W*.22, gh = H*.03;
-  ctx.strokeStyle = 'rgba(255,255,255,.5)';
+  const gw=W*.22, gh=H*.03;
+  ctx.strokeStyle='rgba(255,255,255,.5)';
   ctx.strokeRect((W-gw)/2, py-gh, gw, gh);
   ctx.strokeRect((W-gw)/2, H-py, gw, gh);
-  // Penalty spots (6m and 10m scaled)
-  ctx.fillStyle = lc;
-  ctx.beginPath(); ctx.arc(W/2, py + H*.12, 2.5, 0, Math.PI*2); ctx.fill();
+
+  // Spots
+  ctx.fillStyle=lc;
+  ctx.beginPath(); ctx.arc(W/2, py+H*.12, 2.5, 0, Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(W/2, H-py-H*.12, 2.5, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(W/2, py + H*.20, 2, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(W/2, H-py-H*.20, 2, 0, Math.PI*2); ctx.fill();
 }
 
+// ── PLAYER / ARROW / ZONE DRAWING ────────────────────────────────────
 function drawPlayer(p, isHome) {
-  const r = Math.max(10, Math.min(14, canvas.width * .035));
+  const r = Math.max(10, Math.min(14, canvas.width*.035));
   ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
+  ctx.shadowColor='rgba(0,0,0,.3)'; ctx.shadowBlur=6; ctx.shadowOffsetY=2;
   if (isHome) {
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI*2); ctx.fill();
-    ctx.shadowColor = 'transparent';
-    ctx.strokeStyle = '#222'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI*2); ctx.stroke();
-    ctx.fillStyle = '#111';
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.fill();
+    ctx.shadowColor='transparent';
+    ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle='#111';
   } else {
-    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI*2); ctx.fill();
-    ctx.shadowColor = 'transparent';
-    ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI*2); ctx.stroke();
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle='#1a1a1a'; ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.fill();
+    ctx.shadowColor='transparent';
+    ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle='#fff';
   }
-  ctx.font = `bold ${Math.round(r*.85)}px Helvetica Neue,sans-serif`;
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.shadowColor = 'transparent';
+  ctx.shadowColor='transparent';
+  ctx.font=`bold ${Math.round(r*.85)}px Helvetica Neue,sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText(p.n, p.x, p.y);
   if (p.pos) {
-    ctx.font = `${Math.round(r*.65)}px Helvetica Neue,sans-serif`;
-    ctx.fillStyle = 'rgba(255,255,255,.7)';
-    ctx.fillText(p.pos, p.x, p.y + r + r*.65);
+    ctx.font=`${Math.round(r*.62)}px Helvetica Neue,sans-serif`;
+    ctx.fillStyle='rgba(255,255,255,.65)';
+    ctx.fillText(p.pos, p.x, p.y+r+r*.65);
   }
   ctx.restore();
 }
 
+function drawBall(b) {
+  const r = Math.max(7, Math.min(10, canvas.width * .022));
+  ctx.save();
+  // Shadow
+  ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=7; ctx.shadowOffsetY=3;
+  ctx.fillStyle='#f5f5f5';
+  ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2); ctx.fill();
+  ctx.shadowColor='transparent';
+  // Seam lines (football curved lines)
+  ctx.save();
+  ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2); ctx.clip();
+  ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1;
+  // Vertical seam
+  ctx.beginPath();
+  ctx.moveTo(b.x, b.y-r);
+  ctx.bezierCurveTo(b.x+r*.6, b.y-r*.3, b.x+r*.6, b.y+r*.3, b.x, b.y+r);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(b.x, b.y-r);
+  ctx.bezierCurveTo(b.x-r*.6, b.y-r*.3, b.x-r*.6, b.y+r*.3, b.x, b.y+r);
+  ctx.stroke();
+  // Horizontal seam
+  ctx.beginPath();
+  ctx.moveTo(b.x-r, b.y);
+  ctx.bezierCurveTo(b.x-r*.3, b.y-r*.6, b.x+r*.3, b.y-r*.6, b.x+r, b.y);
+  ctx.stroke();
+  ctx.restore();
+  // Outline
+  ctx.strokeStyle='rgba(0,0,0,.55)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(b.x,b.y,r,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+}
+
+function ballAt(x,y) {
+  const r=Math.max(7,Math.min(10,canvas.width*.022))+4;
+  return (x-ball.x)**2+(y-ball.y)**2 < r*r;
+}
+
 function drawArrow(x1,y1,x2,y2,dashed=false) {
   const dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy);
-  if (len < 8) return;
+  if (len<8) return;
   const ux=dx/len, uy=dy/len;
-  const hl = Math.min(14, len*.32);
-  ctx.strokeStyle = '#E8C84A'; ctx.fillStyle = '#E8C84A'; ctx.lineWidth = 2;
+  const hl=Math.min(14,len*.32);
+  ctx.strokeStyle='#E8C84A'; ctx.fillStyle='#E8C84A'; ctx.lineWidth=2;
   if (dashed) ctx.setLineDash([5,4]);
   ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2-ux*hl*.5, y2-uy*hl*.5); ctx.stroke();
   ctx.setLineDash([]);
@@ -543,206 +611,278 @@ function drawArrow(x1,y1,x2,y2,dashed=false) {
   ctx.closePath(); ctx.fill();
 }
 
+function drawZone(x,y,w,h,preview=false) {
+  ctx.fillStyle='rgba(232,200,74,.12)';
+  ctx.strokeStyle=preview?'rgba(232,200,74,.7)':'rgba(232,200,74,.5)';
+  ctx.lineWidth=1.5;
+  if (preview) ctx.setLineDash([5,4]);
+  ctx.fillRect(x,y,w,h); ctx.strokeRect(x,y,w,h);
+  ctx.setLineDash([]);
+}
+
 function render() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  if (mode === 'futsal') drawFutsalPitch(); else drawSoccerPitch();
-  // Zones
-  zones.forEach(z => {
-    ctx.fillStyle = 'rgba(232,200,74,.12)'; ctx.strokeStyle = 'rgba(232,200,74,.45)';
-    ctx.lineWidth = 1; ctx.fillRect(z.x,z.y,z.w,z.h); ctx.strokeRect(z.x,z.y,z.w,z.h);
-  });
-  // Arrows
-  arrows.forEach(a => drawArrow(a.fx,a.fy,a.tx,a.ty));
-  // Right-drag arrow preview
-  if (rcStart) {
-    const dx=mousePos.x-rcStart.x, dy=mousePos.y-rcStart.y;
-    if (Math.sqrt(dx*dx+dy*dy)>12) drawArrow(rcStart.x,rcStart.y,mousePos.x,mousePos.y,true);
+  if (mode==='futsal') drawFutsalPitch(); else drawSoccerPitch();
+
+  // Committed zones
+  zones.forEach(z=>drawZone(z.x,z.y,z.w,z.h));
+
+  // Committed arrows
+  arrows.forEach(a=>drawArrow(a.fx,a.fy,a.tx,a.ty));
+
+  // Live drag preview
+  if (dragState && dragState.type==='arrow') {
+    const dx=mousePos.x-dragState.startX, dy=mousePos.y-dragState.startY;
+    if (Math.sqrt(dx*dx+dy*dy)>8)
+      drawArrow(dragState.startX,dragState.startY,mousePos.x,mousePos.y,true);
   }
-  // Zone: first corner placed, show live preview rect
-  if (zoneCorner1) {
-    const x=Math.min(zoneCorner1.x,mousePos.x), y=Math.min(zoneCorner1.y,mousePos.y);
-    const w=Math.abs(mousePos.x-zoneCorner1.x), h=Math.abs(mousePos.y-zoneCorner1.y);
-    ctx.fillStyle='rgba(232,200,74,.10)'; ctx.strokeStyle='rgba(232,200,74,.6)';
-    ctx.setLineDash([4,3]); ctx.lineWidth=1;
-    ctx.fillRect(x,y,w,h); ctx.strokeRect(x,y,w,h); ctx.setLineDash([]);
-    // mark first corner
-    ctx.fillStyle='rgba(232,200,74,.9)';
-    ctx.beginPath(); ctx.arc(zoneCorner1.x,zoneCorner1.y,4,0,Math.PI*2); ctx.fill();
+  if (dragState && dragState.type==='zone') {
+    const x=Math.min(dragState.startX,mousePos.x), y=Math.min(dragState.startY,mousePos.y);
+    const w=Math.abs(mousePos.x-dragState.startX), h=Math.abs(mousePos.y-dragState.startY);
+    if (w>4||h>4) drawZone(x,y,w,h,true);
   }
+
+  // Ball (behind players)
+  drawBall(ball);
+
   // Players
-  awayPlayers.forEach(p => drawPlayer(p, false));
-  homePlayers.forEach(p => drawPlayer(p, true));
+  awayPlayers.forEach(p=>drawPlayer(p,false));
+  homePlayers.forEach(p=>drawPlayer(p,true));
 }
 
-// ── INTERACTION ──────────────────────────────────────────────────────
+// ── CANVAS COORDS ─────────────────────────────────────────────────────
 function canvasXY(e) {
-  const r = canvas.getBoundingClientRect();
+  const r=canvas.getBoundingClientRect();
   return {x:(e.clientX-r.left)*(canvas.width/r.width), y:(e.clientY-r.top)*(canvas.height/r.height)};
 }
-function playerAt(x,y) {
-  const r2 = (canvas.width * .038) ** 2;
-  for (let i=homePlayers.length-1;i>=0;i--) {
-    const p=homePlayers[i]; if((x-p.x)**2+(y-p.y)**2<r2) return {team:'home',idx:i};
-  }
-  for (let i=awayPlayers.length-1;i>=0;i--) {
-    const p=awayPlayers[i]; if((x-p.x)**2+(y-p.y)**2<r2) return {team:'away',idx:i};
-  }
-  return null;
-}
-function getPlayer(team,idx) { return team==='home' ? homePlayers[idx] : awayPlayers[idx]; }
 
-canvas.addEventListener('contextmenu', e => e.preventDefault());
+// ── MOUSE EVENTS ──────────────────────────────────────────────────────
+canvas.addEventListener('contextmenu', e=>e.preventDefault());
 
-canvas.addEventListener('mousedown', e => {
-  const {x,y} = canvasXY(e);
-  if (e.button === 2) { rcStart = {x,y}; return; }
-  // left: move players
-  const hit = playerAt(x,y);
-  if (hit) { const p=getPlayer(hit.team,hit.idx); dragging={...hit,ox:p.x-x,oy:p.y-y}; }
-});
+canvas.addEventListener('mousedown', e=>{
+  if (editTarget) { closePlayerEdit(); return; }
+  const {x,y}=canvasXY(e);
+  const hit=playerAt(x,y);
 
-canvas.addEventListener('mousemove', e => {
-  const {x,y} = canvasXY(e);
-  mousePos = {x,y};
-  if (dragging) {
-    const p = getPlayer(dragging.team, dragging.idx);
-    p.x = x+dragging.ox; p.y = y+dragging.oy;
-    p._norm = [p.x/canvas.width, p.y/canvas.height];
-  }
-  render();
-  // Tooltip
-  const hit = playerAt(x,y);
-  const tip = document.getElementById('tip');
-  if (hit && !rcStart) {
-    const p = getPlayer(hit.team, hit.idx);
-    tip.textContent = `${hit.team==='home'?'Home':'Away'} · #${p.n}${p.pos?' '+p.pos:''}`;
-    tip.style.opacity='1'; tip.style.left=(e.clientX+12)+'px'; tip.style.top=(e.clientY-26)+'px';
-  } else tip.style.opacity='0';
-});
-
-canvas.addEventListener('mouseup', e => {
-  const {x,y} = canvasXY(e);
-  if (e.button === 2 && rcStart) {
-    const dx=x-rcStart.x, dy=y-rcStart.y;
-    const dist=Math.sqrt(dx*dx+dy*dy);
-    if (dist > 12) {
-      // right-drag → arrow
-      arrows.push({fx:rcStart.x, fy:rcStart.y, tx:x, ty:y});
-      zoneCorner1 = null;
-    } else {
-      // right-click → zone corner placement
-      if (!zoneCorner1) {
-        zoneCorner1 = {x, y};  // first corner
-      } else {
-        // second corner → create zone
-        const rx=Math.min(zoneCorner1.x,x), ry=Math.min(zoneCorner1.y,y);
-        const rw=Math.abs(x-zoneCorner1.x), rh=Math.abs(y-zoneCorner1.y);
-        if (rw>8&&rh>8) zones.push({x:rx,y:ry,w:rw,h:rh});
-        zoneCorner1 = null;
-      }
-    }
-    rcStart = null;
-    render();
+  if (e.button===2) {
+    // Right button → always zone
+    dragState={type:'zone',startX:x,startY:y,moved:false};
     return;
   }
-  if (dragging) { dragging=null; render(); }
-});
+  if (e.button!==0) return;
 
-canvas.addEventListener('mouseleave', () => {
-  document.getElementById('tip').style.opacity='0';
-  if(dragging){dragging=null;render();}
-  if(rcStart){rcStart=null;render();}
-});
-
-document.addEventListener('keydown', e => {
-  if (e.key==='Escape') { zoneCorner1=null; rcStart=null; render(); }
-});
-
-// Touch (single-finger drag + pinch zoom)
-let lastPinchDist = null;
-function pinchDist(touches) {
-  const dx = touches[0].clientX - touches[1].clientX;
-  const dy = touches[0].clientY - touches[1].clientY;
-  return Math.sqrt(dx*dx + dy*dy);
-}
-function fakeMouseEvent(type, touch) {
-  canvas.dispatchEvent(new MouseEvent(type,{clientX:touch.clientX,clientY:touch.clientY,bubbles:true}));
-}
-canvas.addEventListener('touchstart', e=>{
-  e.preventDefault();
-  if (e.touches.length === 2) { lastPinchDist = pinchDist(e.touches); return; }
-  fakeMouseEvent('mousedown', e.touches[0]);
-},{passive:false});
-canvas.addEventListener('touchmove', e=>{
-  e.preventDefault();
-  if (e.touches.length === 2) {
-    const d = pinchDist(e.touches);
-    if (lastPinchDist) changeZoom((d - lastPinchDist) * 0.005);
-    lastPinchDist = d; return;
+  if (hit) {
+    const p=getPlayer(hit.team,hit.idx);
+    dragState={type:'move',startX:x,startY:y,moved:false,team:hit.team,idx:hit.idx,ox:p.x-x,oy:p.y-y};
+  } else if (ballAt(x,y)) {
+    dragState={type:'ball',startX:x,startY:y,moved:false,ox:ball.x-x,oy:ball.y-y};
+  } else {
+    const type=activeTool; // 'arrow' or 'zone'
+    dragState={type,startX:x,startY:y,moved:false};
   }
-  lastPinchDist = null;
-  fakeMouseEvent('mousemove', e.touches[0]);
-},{passive:false});
-canvas.addEventListener('touchend', e=>{
+});
+
+canvas.addEventListener('mousemove', e=>{
+  const {x,y}=canvasXY(e);
+  mousePos={x,y};
+
+  if (dragState) {
+    const dx=x-dragState.startX, dy=y-dragState.startY;
+    if (Math.sqrt(dx*dx+dy*dy)>4) dragState.moved=true;
+
+    if (dragState.type==='move') {
+      const p=getPlayer(dragState.team,dragState.idx);
+      p.x=x+dragState.ox; p.y=y+dragState.oy;
+      p._norm=[p.x/canvas.width, p.y/canvas.height];
+    } else if (dragState.type==='ball') {
+      ball.x=x+dragState.ox; ball.y=y+dragState.oy;
+      ball._norm=[ball.x/canvas.width, ball.y/canvas.height];
+    }
+  }
+  render();
+
+  // Tooltip
+  const tip=document.getElementById('tip');
+  const hit=playerAt(x,y);
+  if (!dragState && hit) {
+    const p=getPlayer(hit.team,hit.idx);
+    tip.textContent=`${hit.team==='home'?'Home':'Away'} #${p.n}${p.pos?' · '+p.pos:''} — 클릭: 번호 수정`;
+    tip.style.opacity='1'; tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-28)+'px';
+  } else if (!dragState && ballAt(x,y)) {
+    tip.textContent='공 — 드래그로 이동';
+    tip.style.opacity='1'; tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-28)+'px';
+  } else {
+    tip.style.opacity='0';
+  }
+});
+
+canvas.addEventListener('mouseup', e=>{
+  if (!dragState) return;
+  const {x,y}=canvasXY(e);
+
+  if (dragState.type==='move') {
+    if (!dragState.moved) {
+      openPlayerEdit(dragState.team, dragState.idx, e.clientX, e.clientY);
+    }
+  } else if (dragState.type==='ball') {
+    // just drop — nothing extra needed
+  } else if (dragState.type==='arrow') {
+    const dx=x-dragState.startX, dy=y-dragState.startY;
+    if (Math.sqrt(dx*dx+dy*dy)>12)
+      arrows.push({fx:dragState.startX,fy:dragState.startY,tx:x,ty:y});
+  } else if (dragState.type==='zone') {
+    const rx=Math.min(dragState.startX,x), ry=Math.min(dragState.startY,y);
+    const rw=Math.abs(x-dragState.startX), rh=Math.abs(y-dragState.startY);
+    if (rw>8&&rh>8) zones.push({x:rx,y:ry,w:rw,h:rh});
+  }
+
+  dragState=null;
+  render();
+});
+
+canvas.addEventListener('mouseleave', ()=>{
+  document.getElementById('tip').style.opacity='0';
+  if(dragState&&dragState.type!=='move'){dragState=null;render();}
+  // keep move drag alive if mouse leaves (snap back on enter)
+});
+
+document.addEventListener('keydown', e=>{
+  if (e.key==='Escape') { dragState=null; closePlayerEdit(); render(); }
+});
+
+// Close editor on outside click
+document.addEventListener('mousedown', e=>{
+  const overlay=document.getElementById('player-edit');
+  if (editTarget && !overlay.contains(e.target) && e.target!==canvas) closePlayerEdit();
+});
+
+// ── TOUCH ─────────────────────────────────────────────────────────────
+let lastPinchDist=null;
+function pinchDist(t) {
+  const dx=t[0].clientX-t[1].clientX, dy=t[0].clientY-t[1].clientY;
+  return Math.sqrt(dx*dx+dy*dy);
+}
+function mkMouse(type,touch,btn=0) {
+  return new MouseEvent(type,{clientX:touch.clientX,clientY:touch.clientY,button:btn,bubbles:true});
+}
+canvas.addEventListener('touchstart',e=>{
   e.preventDefault();
-  lastPinchDist = null;
-  if (e.touches.length === 0) fakeMouseEvent('mouseup', e.changedTouches[0]);
+  if(e.touches.length===2){lastPinchDist=pinchDist(e.touches);return;}
+  canvas.dispatchEvent(mkMouse('mousedown',e.touches[0]));
 },{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(e.touches.length===2){
+    const d=pinchDist(e.touches);
+    if(lastPinchDist) changeZoom((d-lastPinchDist)*0.005);
+    lastPinchDist=d; return;
+  }
+  lastPinchDist=null;
+  canvas.dispatchEvent(mkMouse('mousemove',e.touches[0]));
+},{passive:false});
+canvas.addEventListener('touchend',e=>{
+  e.preventDefault();
+  lastPinchDist=null;
+  if(e.touches.length===0) canvas.dispatchEvent(mkMouse('mouseup',e.changedTouches[0]));
+},{passive:false});
+
+// ── PLAYER NUMBER EDIT ────────────────────────────────────────────────
+function openPlayerEdit(team, idx, clientX, clientY) {
+  editTarget={team,idx};
+  const p=getPlayer(team,idx);
+  const input=document.getElementById('player-num-input');
+  input.value=p.n;
+  const overlay=document.getElementById('player-edit');
+  overlay.classList.add('show');
+  // Position near tap point, keep within viewport
+  const ow=120, oh=110;
+  let lx=clientX+16, ly=clientY-20;
+  if(lx+ow>window.innerWidth) lx=clientX-ow-8;
+  if(ly+oh>window.innerHeight) ly=window.innerHeight-oh-8;
+  if(ly<8) ly=8;
+  overlay.style.left=lx+'px'; overlay.style.top=ly+'px';
+  setTimeout(()=>{input.focus();input.select();},50);
+}
+
+function confirmPlayerEdit() {
+  if (!editTarget) return;
+  const val=parseInt(document.getElementById('player-num-input').value,10);
+  if (!isNaN(val)&&val>=1&&val<=99) getPlayer(editTarget.team,editTarget.idx).n=val;
+  closePlayerEdit();
+  render();
+}
+
+function closePlayerEdit() {
+  editTarget=null;
+  document.getElementById('player-edit').classList.remove('show');
+}
+
+document.getElementById('player-num-input').addEventListener('keydown', e=>{
+  if(e.key==='Enter') confirmPlayerEdit();
+  if(e.key==='Escape') closePlayerEdit();
+});
 
 // ── CONTROLS ─────────────────────────────────────────────────────────
+function setTool(t) {
+  activeTool=t;
+  document.getElementById('tool-arrow').classList.toggle('active',t==='arrow');
+  document.getElementById('tool-zone').classList.toggle('active',t==='zone');
+  const hints={
+    arrow:'선수 드래그: 이동 · 빈 공간 드래그: 화살표 · 우클릭 드래그: 존 · 선수 클릭: 번호 수정',
+    zone: '선수 드래그: 이동 · 빈 공간 드래그: 존 생성 · 우클릭 드래그: 존 · 선수 클릭: 번호 수정',
+  };
+  document.getElementById('hint-text').textContent=hints[t]||'';
+}
+
 function setMode(m) {
-  mode = m;
-  document.getElementById('m-soccer').classList.toggle('active', m==='soccer');
-  document.getElementById('m-futsal').classList.toggle('active', m==='futsal');
-  playerCount = m==='futsal' ? 5 : 11;
-  document.getElementById('count-val').textContent = playerCount;
+  mode=m;
+  document.getElementById('m-soccer').classList.toggle('active',m==='soccer');
+  document.getElementById('m-futsal').classList.toggle('active',m==='futsal');
+  playerCount=m==='futsal'?5:11;
+  document.getElementById('count-val').textContent=playerCount;
   buildFormSelects();
-  const opts = listFormations(playerCount);
-  document.getElementById('home-form').value = opts[0]?.key || 'gk';
-  document.getElementById('away-form').value = (opts[1] ?? opts[0])?.key || 'gk';
+  const opts=listFormations(playerCount);
+  document.getElementById('home-form').value=opts[0]?.key||'gk';
+  document.getElementById('away-form').value=(opts[1]??opts[0])?.key||'gk';
   arrows=[]; zones=[];
-  resize(); // will re-init players
+  resize();
 }
 
 function changeCount(delta) {
-  const next = Math.max(1, Math.min(15, playerCount + delta));
-  if (next === playerCount) return;
-  playerCount = next;
-  document.getElementById('count-val').textContent = playerCount;
-  buildFormSelects();
-  initBoard();
-  resize();
+  const next=Math.max(1,Math.min(15,playerCount+delta));
+  if(next===playerCount) return;
+  playerCount=next;
+  document.getElementById('count-val').textContent=playerCount;
+  buildFormSelects(); initBoard(); resize();
 }
 
-function clearAll() { arrows=[]; zones=[]; zoneCorner1=null; render(); }
+function clearAll() { arrows=[]; zones=[]; dragState=null; render(); }
 
 function changeZoom(delta) {
-  zoom = Math.max(0.4, Math.min(4.0, zoom + delta));
-  document.getElementById('zoom-val').textContent = Math.round(zoom*100)+'%';
+  zoom=Math.max(0.4,Math.min(4.0,zoom+delta));
+  document.getElementById('zoom-val').textContent=Math.round(zoom*100)+'%';
   resize();
 }
 function resetZoom() {
-  zoom = 1.0;
-  document.getElementById('zoom-val').textContent = '100%';
+  zoom=1.0;
+  document.getElementById('zoom-val').textContent='100%';
   resize();
 }
 
-canvas.addEventListener('wheel', e => {
+canvas.addEventListener('wheel', e=>{
   e.preventDefault();
-  const delta = e.deltaY < 0 ? 0.1 : -0.1;
-  changeZoom(delta);
-}, {passive: false});
+  changeZoom(e.deltaY<0?0.1:-0.1);
+},{passive:false});
 
 // ── BOOT ─────────────────────────────────────────────────────────────
 window.addEventListener('resize', resize);
+
 buildFormSelects();
-const initOpts = listFormations(playerCount);
-const defaultH = initOpts[0]?.key || 'gk';
-const defaultA = (initOpts[1] ?? initOpts[0])?.key || 'gk';
-document.getElementById('home-form').value = defaultH;
-document.getElementById('away-form').value = defaultA;
-homePlayers = buildPlayers(defaultH, false);
-awayPlayers = buildPlayers(defaultA, true);
+const initOpts=listFormations(playerCount);
+document.getElementById('home-form').value=initOpts[0]?.key||'gk';
+document.getElementById('away-form').value=(initOpts[1]??initOpts[0])?.key||'gk';
+homePlayers=buildPlayers(document.getElementById('home-form').value,false);
+awayPlayers=buildPlayers(document.getElementById('away-form').value,true);
 resize();
 </script>
 </body>
