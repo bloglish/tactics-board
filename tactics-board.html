@@ -245,6 +245,11 @@ footer {
       <span class="tool-icon">▭</span>
       <span>존</span>
     </button>
+    <button class="tool-btn" id="tool-pen" onclick="setTool('pen')"
+      title="펜 도구: 빈 공간을 드래그해 자유롭게 그립니다">
+      <span class="tool-icon">✏</span>
+      <span>펜</span>
+    </button>
   </div>
   <div class="sep sep-hint"></div>
   <span class="hint-text" id="hint-text">
@@ -423,6 +428,8 @@ let homePlayers = [];
 let awayPlayers = [];
 let arrows = [];
 let zones = [];
+let paths = [];
+let currentPath = null;
 let ball = {_norm:[.5,.5], x:0, y:0};
 let homeColor = '#ffffff';
 let awayColor = '#1a1a1a';
@@ -502,7 +509,7 @@ function buildFormSelects() {
 function applyFormation(team, key) {
   if (team==='home') homePlayers = buildPlayers(key, false);
   else awayPlayers = buildPlayers(key, true);
-  arrows=[]; zones=[]; ball={_norm:[.5,.5],x:0,y:0}; render();
+  arrows=[]; zones=[]; paths=[]; ball={_norm:[.5,.5],x:0,y:0}; render();
 }
 
 function initBoard() {
@@ -673,6 +680,26 @@ function drawArrow(x1,y1,x2,y2,dashed=false) {
   ctx.closePath(); ctx.fill();
 }
 
+function drawPath(pts, preview=false) {
+  if (pts.length < 2) return;
+  ctx.save();
+  ctx.strokeStyle = '#E8C84A';
+  ctx.lineWidth = preview ? 1.5 : 2;
+  ctx.globalAlpha = preview ? 0.7 : 1;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length - 1; i++) {
+    const mx = (pts[i].x + pts[i+1].x) / 2;
+    const my = (pts[i].y + pts[i+1].y) / 2;
+    ctx.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
+  }
+  ctx.lineTo(pts[pts.length-1].x, pts[pts.length-1].y);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function drawZone(x,y,w,h,preview=false) {
   ctx.fillStyle='rgba(232,200,74,.12)';
   ctx.strokeStyle=preview?'rgba(232,200,74,.7)':'rgba(232,200,74,.5)';
@@ -688,6 +715,10 @@ function render() {
 
   // Committed zones
   zones.forEach(z=>drawZone(z.x,z.y,z.w,z.h));
+
+  // Freehand paths
+  paths.forEach(pts=>drawPath(pts));
+  if (currentPath && currentPath.length > 1) drawPath(currentPath, true);
 
   // Committed arrows
   arrows.forEach(a=>drawArrow(a.fx,a.fy,a.tx,a.ty));
@@ -739,8 +770,8 @@ canvas.addEventListener('mousedown', e=>{
   } else if (ballAt(x,y)) {
     dragState={type:'ball',startX:x,startY:y,moved:false,ox:ball.x-x,oy:ball.y-y};
   } else {
-    const type=activeTool; // 'arrow' or 'zone'
-    dragState={type,startX:x,startY:y,moved:false};
+    dragState={type:activeTool,startX:x,startY:y,moved:false};
+    if (activeTool==='pen') currentPath=[{x,y}];
   }
 });
 
@@ -759,6 +790,10 @@ canvas.addEventListener('mousemove', e=>{
     } else if (dragState.type==='ball') {
       ball.x=x+dragState.ox; ball.y=y+dragState.oy;
       ball._norm=[ball.x/canvas.width, ball.y/canvas.height];
+    } else if (dragState.type==='pen' && currentPath) {
+      const last=currentPath[currentPath.length-1];
+      const dx=x-last.x, dy=y-last.y;
+      if (dx*dx+dy*dy>4) currentPath.push({x,y});
     }
   }
   render();
@@ -787,7 +822,10 @@ canvas.addEventListener('mouseup', e=>{
       openPlayerEdit(dragState.team, dragState.idx, e.clientX, e.clientY);
     }
   } else if (dragState.type==='ball') {
-    // just drop — nothing extra needed
+    // just drop
+  } else if (dragState.type==='pen') {
+    if (currentPath && currentPath.length > 1) paths.push([...currentPath]);
+    currentPath = null;
   } else if (dragState.type==='arrow') {
     const dx=x-dragState.startX, dy=y-dragState.startY;
     if (Math.sqrt(dx*dx+dy*dy)>12)
@@ -895,9 +933,11 @@ function setTool(t) {
   activeTool=t;
   document.getElementById('tool-arrow').classList.toggle('active',t==='arrow');
   document.getElementById('tool-zone').classList.toggle('active',t==='zone');
+  document.getElementById('tool-pen').classList.toggle('active',t==='pen');
   const hints={
     arrow:'선수 드래그: 이동 · 빈 공간 드래그: 화살표 · 우클릭 드래그: 존 · 선수 클릭: 번호 수정',
     zone: '선수 드래그: 이동 · 빈 공간 드래그: 존 생성 · 우클릭 드래그: 존 · 선수 클릭: 번호 수정',
+    pen:  '선수 드래그: 이동 · 빈 공간 드래그: 자유 드로잉 · 우클릭 드래그: 존 · 선수 클릭: 번호 수정',
   };
   document.getElementById('hint-text').textContent=hints[t]||'';
 }
@@ -924,7 +964,7 @@ function changeCount(delta) {
   buildFormSelects(); initBoard(); resize();
 }
 
-function clearAll() { arrows=[]; zones=[]; dragState=null; render(); }
+function clearAll() { arrows=[]; zones=[]; paths=[]; currentPath=null; dragState=null; render(); }
 
 function openAbout() { document.getElementById('about-overlay').classList.add('show'); }
 function closeAbout(e) {
