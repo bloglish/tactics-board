@@ -151,22 +151,26 @@ footer {
 
 /* ── MOBILE ── */
 @media (max-width:600px) {
-  header { padding:6px 12px; gap:8px; }
-  .form-wrap { order:3; width:100%; padding-bottom:2px; }
-  .mode-tabs { order:1; }
+  /* Header: row1 = mode + count, row2 = formations */
+  header { padding:6px 10px; gap:6px; }
+  .mode-tabs { order:1; flex-shrink:0; }
   .count-ctrl { order:2; margin-left:auto; }
+  .form-wrap { order:3; width:100%; justify-content:center; padding:2px 0 2px; gap:6px; }
+  .form-select { min-width:80px; max-width:120px; }
 
-  footer { padding:6px 10px; gap:6px; }
+  /* Footer: single row, no wrap, zoom hidden (use pinch) */
+  footer { padding:6px 10px; gap:6px; flex-wrap:nowrap; min-height:auto; }
   .hint-text { display:none; }
-  .sep.sep-hint { display:none; }
-  .tool-btn { padding:7px 10px; }
-  .tool-label-sm { display:inline; }
-
-  .zoom-group { margin-left:auto; }
+  .sep { display:none; }
+  .zoom-group { display:none; }
+  .clear-btn { margin-left:auto; padding:6px 10px; }
+  .about-btn { margin-left:0; }
 }
-@media (max-width:380px) {
-  .tool-btn { padding:7px 8px; font-size:10px; }
+
+@media (max-width:360px) {
   .vs-badge { display:none; }
+  .tool-btn { padding:7px 8px; font-size:10px; }
+  .color-pick { width:22px; height:22px; }
 }
 </style>
 </head>
