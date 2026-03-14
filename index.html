@@ -571,7 +571,12 @@ function drawPlayer(p, isHome) {
 function drawBall(b) {
   const r = Math.max(11, Math.min(15, canvas.width * .030));
   ctx.save();
-  ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=6; ctx.shadowOffsetY=2;
+  // Shadow + white backing circle (emoji on canvas is transparent without this)
+  ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=7; ctx.shadowOffsetY=2;
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(b.x, b.y, r, 0, Math.PI*2); ctx.fill();
+  ctx.shadowColor='transparent';
+  // Emoji on top
   ctx.font = `${Math.round(r * 2)}px serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
