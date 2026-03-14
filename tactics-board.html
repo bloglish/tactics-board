@@ -570,17 +570,19 @@ function drawPlayer(p, isHome) {
 
 function drawBall(b) {
   const r = Math.max(11, Math.min(15, canvas.width * .030));
+  const size = Math.round(r * 2);
+  const pad = r;
+  // Render emoji to offscreen canvas first, then drawImage with shadow
+  const ofc = document.createElement('canvas');
+  ofc.width = size + pad*2; ofc.height = size + pad*2;
+  const ofctx = ofc.getContext('2d');
+  ofctx.font = `${size}px serif`;
+  ofctx.textAlign = 'center';
+  ofctx.textBaseline = 'middle';
+  ofctx.fillText('⚽', ofc.width/2, ofc.height/2);
   ctx.save();
-  // Shadow + white backing circle (emoji on canvas is transparent without this)
   ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=7; ctx.shadowOffsetY=2;
-  ctx.fillStyle='#fff';
-  ctx.beginPath(); ctx.arc(b.x, b.y, r, 0, Math.PI*2); ctx.fill();
-  ctx.shadowColor='transparent';
-  // Emoji on top
-  ctx.font = `${Math.round(r * 2)}px serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('⚽', b.x, b.y);
+  ctx.drawImage(ofc, b.x - ofc.width/2, b.y - ofc.height/2);
   ctx.restore();
 }
 
